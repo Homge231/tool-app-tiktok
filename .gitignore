@@ -1,0 +1,17 @@
+models/
+logs/
+.pw-profile/
+config.yaml
+config.local.yaml
+tests/data/
+.venv/
+/build/
+/dist/NumberTyper/
+/dist/NumberTyper.exe
+/dist/NumberTyper-Setup-*.exe
+/packaging/windows/NumberTyper-Setup.exe
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.ruff_cache/
+*.egg-info/

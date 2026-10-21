@@ -1,0 +1,27 @@
+{
+  "manifest_version": 3,
+  "name": "NumberTyper Tab Audio",
+  "version": "0.1.0",
+  "description": "Captures selected-tab audio for local NumberTyper processing and can fill or submit a number in the same tab.",
+  "permissions": [
+    "activeTab",
+    "offscreen",
+    "scripting",
+    "storage",
+    "tabCapture"
+  ],
+  "host_permissions": [
+    "http://127.0.0.1/*"
+  ],
+  "background": {
+    "service_worker": "service-worker.js"
+  },
+  "action": {
+    "default_popup": "popup.html",
+    "default_title": "NumberTyper tab audio"
+  },
+  "content_security_policy": {
+    "extension_pages": "script-src 'self'; object-src 'self';"
+  },
+  "key": "MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEA8irOHvacbpTN37vm0C5G3kD6ZRsZdYovmgewC5J4eriLVFxSYvg46/hUFBbKYtq2ETsznQo+hleCqxcl8E2bp2abl80CEJdRSmUqhNiHvCvu5rCBZofz8qMB8U3S4JRoYyjUp5gHCy2d0yBej8AF5sLltvwtLHYu/qxNMIDqXPeJzTvIGTX+VqBbq9RCUlq21/qTU8ta/nhVy3HTFj/TkVkFuU02e7gW4doxcwAFxr6LCYPz6uPQCLnMZtZH+XQaJ+rkez+h+I6w5H0M1oOKcLtIP/ovS8cH9CDVAROweI8MpbVsdUgGSiRizO+GibHGz5ol51huwfsLd65MPG5/EQIDAQAB"
+}

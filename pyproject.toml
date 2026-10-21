@@ -1,0 +1,29 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "pricetyper"
+version = "0.1.0"
+requires-python = ">=3.12"
+dependencies = [
+  "vosk==0.3.45", "sherpa-onnx==1.13.8", "soundcard>=0.4.6", "numpy>=2.0", "keyboard==0.13.5",
+  "pyautogui==0.9.54", "playwright>=1.56", "pydantic>=2.9", "pyyaml>=6.0",
+  "websockets>=15.0",
+]
+
+[project.optional-dependencies]
+dev = ["pytest>=8", "pytest-timeout>=2.3", "ruff"]
+resample = ["scipy>=1.14"]
+asr = ["faster-whisper==1.2.1"]
+robust-asr = ["faster-whisper==1.2.1"]
+
+[project.scripts]
+pricetyper = "pricetyper.cli:main"
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.pytest.ini_options]
+markers = ["browser: cần Google Chrome"]
+timeout = 60

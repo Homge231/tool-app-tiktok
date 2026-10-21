@@ -1,0 +1,66 @@
+version: 1
+mode: web
+run:
+  start_armed: false
+  dry_run: true
+  log_dir: logs
+  log_level: INFO
+  hotkeys: {toggle: f8, calibrate: f9, panic: f10}
+audio:
+  source: browser_tab
+  device: default
+  wav_path: null
+  wav_speed: 1.0
+  sample_rate: 16000
+  chunk_ms: 40
+  queue_max_chunks: 50
+asr:
+  engine: zipformer
+  model_path: models/vosk-model-small-vn-0.4
+  zipformer_model_dir: models/sherpa-onnx-zipformer-vi-30M-int8-2026-02-09
+  vad_model_path: models/silero_vad.onnx
+  words: false
+  max_alternatives: 0
+parser:
+  shorthand: true
+  k_tokens: [k, ca, ka]
+decision:
+  min_value: 1000   # số dưới 1.000₫ mặc định không phải candidate giá
+  max_value: 2000000   # đơn vị đồng; có thể tăng tối đa 999999999
+  gate_mode: any_number
+  anchor_before: [giá, chỉ, chốt, lấy, còn, bán]
+  anchor_after: [k, ca, ka, nghìn, ngàn, đồng]
+  exclude_prev: [size, số, ngày, tháng, lúc, giờ, mã, cỡ]
+  exclude_next: [cái, chiếc, người, bạn, kg, cm, mét, tuổi, giờ, phút, giây, ngày, tháng, tiếng, phần, lần]
+  countdown_filter: true
+  hold_complete_ms: 120
+  hold_open_ms: 350
+  cooldown_same_s: 10.0
+  cooldown_any_s: 1.5
+  max_sends_per_min: 10
+output:
+  template: '{value}'
+  send_mode: enter
+sender:
+  type: playwright
+  playwright:
+    user_data_dir: .pw-profile
+    channel: chrome
+    attach: launch
+    cdp_url: http://127.0.0.1:9222
+    live_url: ''
+    url_pattern: '**/@*/live*'
+    chat_input_selectors: []
+    send_button_selector: ''
+    focus_each_time: false
+    verify_after_send: false
+  desktop:
+    chat_xy: null
+    send_xy: null
+    click_each_time: true
+  adb:
+    adb_path: adb
+    serial: ''
+    chat_xy: null
+    send_xy: null
+    send_keyevent: 66
