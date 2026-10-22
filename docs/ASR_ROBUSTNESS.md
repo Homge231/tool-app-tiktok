@@ -76,6 +76,43 @@ No source audio was written by the experiment; it was decoded and processed in m
 
 Model availability check on 2026-10-21: the sherpa-onnx catalog documents a Vietnamese offline Zipformer model, while its online/streaming transducer catalog did not list a Vietnamese model. This is a catalog observation, not proof that no third-party Vietnamese streaming model exists. The Vosk API exposes dynamic phrase grammars, but this experiment shows that restricting the output space alone does not guarantee number recall.
 
+### Gipformer 1.5 and true-streaming Zipformer experiment — 2026-10-22
+
+The optional benchmark now includes two local-only candidates while retaining the current Zipformer-VI 30M INT8 + Silero VAD path as the app core:
+
+- **Gipformer 1.5 68M RNNT INT8** is an offline transducer. Its official inference example uses sherpa-onnx; the model card publishes benchmark results across Vietnamese speech datasets, but those are publisher-reported WER values and are not livestream number-accuracy measurements. The weights are MIT-licensed.
+- **Zipformer-30M-RNNT-Streaming-6000h, chunk 16** is a genuine online transducer that can emit changing partial text while audio chunks arrive. On the evaluation sets listed in its model card, the streaming variant has higher (worse) WER than its offline sibling; this reinforces the need to compare latency and accuracy separately. Its license is CC-BY-NC-ND-4.0, so this repository downloads it only to the ignored local `models/` directory for evaluation. Do not modify, bundle, or redistribute these weights.
+
+Download the two benchmark candidates explicitly (neither is downloaded by the app installer):
+
+```powershell
+.\.venv\Scripts\python.exe scripts\download_asr_experiments.py --gipformer --streaming-zipformer
+```
+
+Run the benchmark against a user-provided local video/audio file; PyAV decodes only the selected audio interval to in-memory mono 16 kHz samples and does not create an intermediate WAV:
+
+```powershell
+.\.venv\Scripts\python.exe -m pip install -e ".[asr-benchmark]"
+.\.venv\Scripts\python.exe scripts\benchmark_asr_experiments.py `
+  --media "C:\path\to\labeled-video.mp4" --start 7 --duration 7 `
+  --numbers "3000,4000,5000,6000" --realtime
+```
+
+If the exact time the target number finishes is known within the selected clip, add `--number-end-ms N`. With `--realtime`, the script then reports when the streaming model first emits that target after the labeled number end. This is local ASR + parser latency only; it excludes VAD endpoint delay, browser capture, extension transport, UI scheduling, sender action, and TikTok/network delivery. Audio is not uploaded or written to disk. The script never creates a sender.
+
+Exploratory run record on the two screen-capture videos the user had supplied (2026-10-22):
+
+| Input interval | Current offline Zipformer-VI | Gipformer 1.5 INT8 | Streaming Zipformer chunk-16 |
+|---|---|---|---|
+| Edge capture 00:07–00:14, real-time feeding (second run) | `BA NGHÌN BỐN NGHÌN RỒI NĂM LIỀN SÁU NGHÌN`; parsed `[3000, 4000, 5, 6000]`; 151 ms | `BA NGÀN BỐN TRĂM RỒI NGON LIỀN SÁU NGÀN`; parsed `[6000]`; 179 ms | `BA MẸ NGỦ LUÔN RỒI`; parsed `[3]`; decode total 388 ms, per-call P50/P95/max 18/21/22 ms, RTF 0.055. First partial was at audio offset 1.12 s: `BA`, which the number parser immediately interpreted as `[3]`; the model did not produce the complete spoken sequence. |
+| Edge capture 00:00–00:07 | `RỒI`; no number; 121 ms | `RỒI RỒI`; no number; 159 ms | `RỒI`; no number; decode total 349 ms, RTF 0.050; first partial at audio offset 5.28 s. |
+
+The first interval was paced as real-time audio; the second was decoded as fast as the CPU allowed. Neither segment has a verified ground-truth transcript aligned to the screen-capture offset. An earlier note labeled a source-video interval 00:00–00:07 as `[1000, 2000, 3000, 4000]`, but the screen recording's first seven seconds transcribe only as “rồi”; these are different time origins and the label cannot be applied to this capture. Therefore **no exact-number accuracy score is valid for these runs**. The 00:07–00:14 outputs show Gipformer extracted one value and streaming Zipformer produced a plausible but different numeric token; without a verified transcript, neither is evidence of accuracy. One short clip is insufficient to select a new production engine or claim a latency target.
+
+Across the two runs, model initialization ranged from about 0.8–1.45 s for current Zipformer, 0.97–1.17 s for Gipformer, and 1.2–1.46 s for streaming Zipformer on this workstation. Warm inference time excludes this one-time load. The streaming model's first partial is not necessarily a number; in this sample a partial word became a numeric candidate before the model could settle. Chunk decode time is not number-end-to-candidate latency. Add correctly aligned end-of-number labels and repeat across clean, noisy, accent, and overlap samples before deciding whether to change the core.
+
+Benchmark code added: `src/pricetyper/asr/experimental_engines.py`, `scripts/download_asr_experiments.py`, and `scripts/benchmark_asr_experiments.py`. Candidate model files remain ignored under `models/`.
+
 ### Benchmark-only integration — 2026-10-21
 
 The ASR comparison window now has a fourth lane, `Vosk số`, implemented with Vosk's phrase-grammar constructor and the existing Vietnamese Vosk acoustic model. It enumerates 1,341 phrases built from common 1–20 readings, contiguous counting sequences, `nghìn`, and the connector `rồi`, with `[unk]`. Raw and DPDFNet-enhanced audio are both scored. The session shares one loaded Vosk acoustic model between the unrestricted and grammar recognizers to avoid loading a duplicate model. The lane is visibly marked experimental and is excluded from branch and strict consensus so it cannot alter the prior three-model preview. It returns only phrases in its finite grammar and may ignore a seller sentence outside that vocabulary; it is not an independently trained number-only model.

@@ -17,6 +17,7 @@ dev = ["pytest>=8", "pytest-timeout>=2.3", "ruff"]
 resample = ["scipy>=1.14"]
 asr = ["faster-whisper==1.2.1"]
 robust-asr = ["faster-whisper==1.2.1"]
+asr-benchmark = ["av>=14.0"]
 
 [project.scripts]
 pricetyper = "pricetyper.cli:main"

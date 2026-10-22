@@ -6,9 +6,7 @@ config.local.yaml
 tests/data/
 .venv/
 /build/
-/dist/NumberTyper/
-/dist/NumberTyper.exe
-/dist/NumberTyper-Setup-*.exe
+/dist/
 /packaging/windows/NumberTyper-Setup.exe
 __pycache__/
 *.py[cod]

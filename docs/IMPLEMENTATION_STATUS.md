@@ -1,6 +1,6 @@
 # PriceTyper implementation status
 
-Updated: 2026-10-21
+Updated: 2026-10-22
 
 This file tracks code present in the workspace separately from acceptance evidence. “Implemented” does not mean verified on a live browser, audio device, or phone.
 
@@ -9,7 +9,7 @@ This file tracks code present in the workspace separately from acceptance eviden
 | M0 | package skeleton, Pydantic configuration, example YAML, CLI command declarations, JSONL logger, shared types | Core config and CLI tests pass. M0 remains partial because later module and hardware checks are outstanding. |
 | M1 | Vietnamese number parser, context gate, decision hold/cooldown/rate-limit logic | Parser, gate, and decider reference cases pass. Price values are normalized to đồng: bare numbers stay literal, while `nghìn`/`ngàn`/`k` multiply by 1,000. |
 | M2 | WAV and loopback sources, record command, 16 kHz PCM WAV validation; record now captures the requested sample count and trims the final chunk | Passed on this Windows audio device: `record --seconds 10` created a 10.00 s, mono, PCM 16-bit, 16 kHz WAV (160,000 frames). The 16 kHz device path worked, so the conditional 48→16 kHz fallback was not needed or exercised. |
-| M3 | Zipformer-VI + Silero VAD default engine, Vosk baseline, audio/ASR/decision/sender threads, replay, JSONL events, truth-based latency report | Partial. Unit tests and a local-model silence smoke check pass. No labeled WAV replay or precision/recall dataset has been run. |
+| M3 | Zipformer-VI + Silero VAD default engine, Vosk baseline, audio/ASR/decision/sender threads, replay, JSONL events, truth-based latency report | Partial. Unit tests and a local-model silence smoke check pass. No labeled WAV replay or precision/recall dataset has been run. Gipformer 1.5 and third-party Zipformer streaming are optional local benchmark lanes only; they do not replace the core. |
 | M4 | Playwright, desktop, ADB and null senders; controller; F8/F10; local fake page; sender and replay latency commands | Partial. Local fake-page sender now passes with Edge; no interactive F8/F10 acceptance has been run. |
 | M5 | Tkinter status/control window, calibrate, discover | Partial. Manual §7.2 checklist has not been run. |
 | M6 | ADB fallback and Android setup guide | Not verified. No Android device/scrcpy session was available for acceptance. |
@@ -17,9 +17,15 @@ This file tracks code present in the workspace separately from acceptance eviden
 | M8 | Chromium extension session carries selected-tab audio and performs number actions in the same tab | Number-first decisions, fill-only default, explicit opt-in Enter dispatch, and prioritized TikTok chat-input selector are implemented; local tests pass. No browser has passed current capture/action acceptance. Exact-number accuracy and under-1-second end-to-comment latency are not accepted. Firefox/Safari/mobile and packaged onboarding remain unsupported. See `docs/BROWSER_COMPATIBILITY.md`. |
 | P1 Windows installer | PyInstaller one-directory app, NSIS per-user installer, first-run extension guide and local data paths | Rebuilt the app bundle and installer after removing the unused desktop-automation stack. The new package has not had its executable/model smoke check or installation check run. No store submission, clean-account/browser acceptance, full native/transitive SBOM, or public release clearance. See `docs/SPRINT_P1_WINDOWS_INSTALLER.md`. |
 
+## Optional ASR candidate experiment — 2026-10-22
+
+Added local download and benchmark scripts for Gipformer 1.5 INT8 and a true online Zipformer Vietnamese RNNT (chunk 16). The currently selected Zipformer-VI remains the only app core. Candidate downloads live under ignored `models/`; the streaming weights are CC-BY-NC-ND-4.0 and excluded from installer/release. The benchmark decodes selected intervals from local media in memory, reports number parsing and chunk timing, and never creates a sender.
+
+An earlier run on the user-provided Edge screen recording, 00:07–00:14, gave current Zipformer `[3000, 4000, 5, 6000]` in 134 ms, Gipformer `[6000]` in 156 ms, and streaming Zipformer `[3]` in 367 ms with RTF 0.052. The second paced run is recorded in `docs/ASR_ROBUSTNESS.md` (151/179/388 ms). Streaming began returning partial text at 1.12 s of clip audio, but did not output the full count. The referenced source-video label `[1000, 2000, 3000, 4000]` is not aligned to this screen recording's 00:00–00:07 interval, so neither run has a valid exact-number score. This is exploratory evidence only; it does not support changing the app core or claiming the 0.7–0.8 s target. See `docs/ASR_ROBUSTNESS.md` for commands, detailed output, and the remaining label-alignment requirement.
+
 ## Immediate work before relying on live sending
 
-1. Run the suite under Python 3.12 when available. In this workspace, `.venv` uses Python 3.14 and the latest `pytest -q` reports **150 passed**. Python 3.14 satisfies `requires-python >=3.12`, but does not replace the documented Python 3.12 reference environment.
+1. Run the suite under Python 3.12 when available. In this workspace, `.venv` uses Python 3.14 and the latest full suite run on 2026-10-22 reports **165 passed**. Python 3.14 satisfies `requires-python >=3.12`, but does not replace the documented Python 3.12 reference environment.
 2. Run a labeled local WAV replay with `--dry-run` and collect precision/recall results. The model is present and initializes; the earlier hardware record check passed and its temporary WAV was deleted after format validation.
 3. The Playwright fake-page case passed with installed Edge in the M7 checks; no TikTok page was opened.
 4. Review §7.2 GUI checklist and test F8/F10.
