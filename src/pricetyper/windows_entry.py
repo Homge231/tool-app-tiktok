@@ -125,7 +125,7 @@ def _required_resources() -> list[Path]:
 def _show_first_run(extension_dir: Path, completion_marker: Path) -> bool:
     """Show the manual extension setup required by this private preview."""
     root = Tk()
-    root.title("NumberTyper — thiết lập lần đầu")
+    root.title("NumberTyper — thiết lập extension trình duyệt")
     root.geometry("640x500")
     root.resizable(False, False)
     root.protocol("WM_DELETE_WINDOW", root.destroy)
@@ -140,10 +140,11 @@ def _show_first_run(extension_dir: Path, completion_marker: Path) -> bool:
     ttk.Label(
         content,
         text=(
-            "Đây là bản preview cá nhân. Để nghe âm thanh của tab, bạn cần nạp "
-            "tiện ích NumberTyper vào trình duyệt một lần. Ứng dụng không tự cài "
-            "tiện ích; bản extension chưa được phát hành trên cửa hàng. Khi có "
-            "bản cửa hàng, trình duyệt vẫn sẽ hỏi bạn xác nhận quyền."
+            "Để nghe âm thanh của tab, hãy nạp tiện ích NumberTyper vào trình "
+            "duyệt một lần. Bản preview chưa có trên cửa hàng nên trình duyệt "
+            "cần bạn bật Chế độ nhà phát triển và chọn Nạp tiện ích đã giải nén. "
+            "NumberTyper không cài extension âm thầm. Khi có bản cửa hàng, "
+            "trình duyệt vẫn sẽ yêu cầu bạn xác nhận cài đặt/quyền."
         ),
         wraplength=525,
         justify="left",
@@ -163,10 +164,11 @@ def _show_first_run(extension_dir: Path, completion_marker: Path) -> bool:
     browser_select.pack(side="left", padx=(8, 10))
 
     instructions = (
-        "1. Mở trang quản lý tiện ích bằng nút bên dưới.\n"
-        "2. Với bản preview này, bật Chế độ nhà phát triển → Nạp tiện ích đã "
+        "1. Chọn trình duyệt, rồi bấm Mở trang và thư mục tiện ích.\n"
+        "2. Trong trình duyệt, bật Chế độ nhà phát triển → Nạp tiện ích đã "
         "giải nén.\n"
-        "3. Chọn thư mục NumberTyper Tab Audio.\n"
+        "3. Chọn thư mục extension đã mở. Đây là bước xác nhận thủ công bắt "
+        "buộc cho bản preview.\n"
         "4. Mở TikTok Live, bấm biểu tượng NumberTyper và bắt đầu thu tab.\n"
         "5. App mặc định chạy thử/chưa kích hoạt nên không điền số. Muốn điền, "
         "kết nối và kiểm tra tab, bỏ chọn Chạy thử rồi nhấn F8. Gửi Enter cần "
@@ -225,6 +227,10 @@ def _show_first_run(extension_dir: Path, completion_marker: Path) -> bool:
                 parent=root,
             )
 
+    def open_setup_targets() -> None:
+        open_extension_folder()
+        open_extensions_page()
+
     def copy_extension_path() -> None:
         root.clipboard_clear()
         root.clipboard_append(str(extension_dir))
@@ -248,8 +254,8 @@ def _show_first_run(extension_dir: Path, completion_marker: Path) -> bool:
 
     ttk.Button(
         actions,
-        text="Mở thư mục tiện ích",
-        command=open_extension_folder,
+        text="Mở trang và thư mục tiện ích",
+        command=open_setup_targets,
     ).pack(side="left")
     ttk.Button(
         actions,
@@ -282,10 +288,11 @@ def main() -> int:
         return 1
 
     smoke_check = sys.argv[1:] == ["--smoke-check"]
+    setup_extension = sys.argv[1:] == ["--setup-extension"]
     first_run_marker = data_dir / "first_run_complete"
     if (
         not smoke_check
-        and not first_run_marker.exists()
+        and (setup_extension or not first_run_marker.exists())
         and not _show_first_run(resource_root() / "browser_extension", first_run_marker)
     ):
         return 0

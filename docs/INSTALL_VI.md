@@ -11,7 +11,7 @@ Bản này dành cho Windows 10/11 64-bit, chạy nhận dạng Zipformer-VI c�
 1. Mở `NumberTyper-Setup-0.1.0-preview.exe`.
 2. Cài theo hướng dẫn. Không cần cài Python hay chạy PowerShell.
 3. Có thể chọn tạo shortcut ngoài Desktop; shortcut trong Menu Bắt đầu luôn được tạo.
-4. Ở lần mở đầu, chọn đúng trình duyệt rồi bấm **Mở trang tiện ích**. Bấm **Mở thư mục tiện ích** để mở thư mục extension; có thể dùng **Sao chép đường dẫn**.
+4. Ở trang cuối bộ cài, chọn **Thiết lập extension trong trình duyệt** nếu muốn mở trợ lý thiết lập ngay. Trợ lý cho chọn browser rồi mở đồng thời trang quản lý extension và thư mục extension.
 
 ## Nạp extension thủ công
 
@@ -19,11 +19,11 @@ Trong trình duyệt Chromium mà bạn muốn thử:
 
 1. Tại trang quản lý extension vừa mở, bật **Chế độ nhà phát triển**.
 2. Chọn **Nạp tiện ích đã giải nén** (Load unpacked).
-3. Chọn thư mục extension mà NumberTyper vừa mở.
+3. Chọn thư mục extension mà NumberTyper vừa mở. Đây là bước xác nhận thủ công bắt buộc cho bản preview; bộ cài không nạp extension âm thầm.
 4. Mở một trang TikTok Live. Bấm biểu tượng NumberTyper trên thanh extension rồi bấm **Bắt đầu thu tab này**.
 5. Trở lại NumberTyper và bấm **Kết nối tab TikTok đang nghe** để kiểm tra tab/ô nhập.
 
-Extension chỉ cấp âm thanh của tab đã chọn và yêu cầu thao tác số quay lại đúng tab đó. Nếu capture dừng, bấm F10 nếu cần dừng ngay, kết nối lại extension rồi kiểm tra tab. Không đổi sang microphone hay âm thanh toàn máy.
+Extension chỉ cấp âm thanh của tab đã chọn và yêu cầu thao tác số quay lại đúng tab đó. Nếu capture dừng, bấm F10 nếu cần dừng ngay, kết nối lại extension rồi kiểm tra tab. Không đổi sang microphone hay âm thanh toàn máy. [Chrome hướng dẫn nạp extension local trong Developer mode](https://developer.chrome.com/docs/extensions/get-started/tutorial/hello-world); [Edge hướng dẫn sideload extension để thử nghiệm](https://learn.microsoft.com/en-us/microsoft-edge/extensions-chromium/getting-started/extension-sideloading).
 
 ## Chế độ an toàn
 

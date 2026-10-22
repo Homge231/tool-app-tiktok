@@ -18,7 +18,9 @@ ShowUnInstDetails show
 !insertmacro MUI_PAGE_COMPONENTS
 !insertmacro MUI_PAGE_INSTFILES
 !define MUI_FINISHPAGE_RUN "$INSTDIR\${APP_EXE}"
-!define MUI_FINISHPAGE_RUN_TEXT "Mở NumberTyper"
+!define MUI_FINISHPAGE_RUN_TEXT "Thiết lập extension trong trình duyệt"
+!define MUI_FINISHPAGE_RUN_PARAMETERS "--setup-extension"
+!define MUI_FINISHPAGE_TEXT "Nếu chọn mục bên dưới, NumberTyper sẽ mở trợ lý thiết lập extension. Trình duyệt vẫn yêu cầu bạn xác nhận nạp extension thủ công."
 !insertmacro MUI_PAGE_FINISH
 
 !insertmacro MUI_UNPAGE_CONFIRM

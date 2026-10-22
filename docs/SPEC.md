@@ -130,7 +130,7 @@ Gửi số vào ô chat bằng sender đã chọn, đúng 1 lần mỗi lệnh
 test trang giả: window.__sent bằng ['199']
 FR-07
 Bật hoặc tắt bất kỳ lúc nào bằng hotkey, nút GUI, lệnh CLI; nhận dạng luôn chạy
-sau khi tắt không còn lệnh gửi nào được thực thi; bật lại không khởi động lại nhận dạng
+sau khi tắt không còn lệnh gửi nào được thực thi; bật lại không khởi động lại nhận dạng. Sau lần điền thành công, chỉ báo ASR/mức audio vẫn tiếp tục cập nhật và F8 vẫn disarm được; lỗi cập nhật giao diện đơn lẻ không được làm dừng vòng poll.
 FR-08
 Phím dừng khẩn
 tiến trình thoát mã 130; sender được đóng
@@ -153,8 +153,8 @@ FR-14
 YouTube test-only mode bắt audio tab do người dùng chủ động chọn, chạy nhận dạng/trích số và khóa mọi sender thật
 Test `--youtube-test` dùng NullSender, hiển thị số không qua gate giá, không mở TikTok, không gửi chat; kiểm tra thủ công với URL video đã ghi
 FR-15
-Bản phát hành cuối có installer và shortcut Windows; người dùng không cần Python/PowerShell
-Kiểm tra trên máy Windows sạch: cài, mở shortcut, gỡ cài đặt; milestone sau prototype
+Bản phát hành cuối có installer và shortcut Windows; người dùng không cần Python/PowerShell. Trang cuối bộ cài có lựa chọn mở trợ lý thiết lập extension; bản preview local vẫn yêu cầu người dùng xác nhận nạp extension thủ công.
+Kiểm tra trên máy Windows sạch: cài, mở shortcut, trợ lý extension, gỡ cài đặt; milestone sau prototype
 FR-16
 Nhận dạng lời nói tiếng Việt khi có nhạc/ồn, nhiều accent vùng miền và nhiều người nói
 P0.1 phải benchmark có nhãn trên audio single-speaker sạch, speech + music/noise, ba vùng giọng Bắc/Trung/Nam và đoạn chồng lấp; ưu tiên exact-number accuracy, số bỏ sót/thừa, WER/CER, P50/P95 latency và RAM. Giá qua gate là phép đo phụ. Phân đoạn chồng lấp/không chắc không được đoán số; chỉ đạt khi có kết quả benchmark tái lập, không chỉ qua unit test.
@@ -1583,8 +1583,8 @@ Các lần kiểm tra M7 chỉ dùng fake page/protocol; không chứng minh bro
 M8 (đa trình duyệt; đang triển khai)
 Giữ parser, gate, quyết định, Zipformer/VAD và bridge PCM dùng chung. TikTok Web dùng number scope: bỏ qua gate giá, chỉ xử lý ASR final, chọn số cuối; dãy đếm tường minh được tách thành số riêng. Extension Chromium capture và thao tác trong cùng TikTok Live tab, xác minh tab ID, host/path và input nhìn thấy được. Selector input được xét theo thứ tự cụ thể đến tổng quát: ưu tiên duy nhất `[data-e2e="room-chat-input-field"]` khi selector này khớp; nếu nó không khớp thì mới dùng các selector dự phòng. Nếu selector được xét khớp nhiều input, phải từ chối thay vì đoán. Mặc định chỉ điền số vào input trống. Một checkbox tắt sẵn bật chế độ gửi bằng một synthetic DOM Enter sau khi điền; sự kiện có `isTrusted=false` và TikTok có thể bỏ qua. Cần connect/probe, bỏ dry-run và F8. Chỉ dùng một lần, không retry. Acknowledgement xác nhận event đã được dispatch, không chứng minh TikTok nhận/hiển thị comment. Acceptance cần local fake page, protocol và kiểm tra tương tác thật trên từng browser/OS được công bố. Không gọi “universal” nếu chưa có bằng chứng; unsupported phải hiện rõ. Installer/onboarding cửa hàng, độ đúng số và P95 latency còn chưa nghiệm thu.
 P1
-Đóng gói bản Windows với Python runtime, installer, shortcut Start/Desktop và uninstaller sau khi P0 đạt
-Cài và mở trên tài khoản Windows sạch không cần Python hoặc PowerShell; không làm packaging trong prototype hiện tại
+Đóng gói bản Windows với Python runtime, installer, shortcut Start/Desktop và uninstaller sau khi P0 đạt; checkbox ở trang hoàn tất có thể mở trợ lý thiết lập extension. Extension local chưa phát hành store vẫn cần người dùng xác nhận nạp thủ công.
+Cài và mở trên tài khoản Windows sạch không cần Python hoặc PowerShell; kiểm tra lựa chọn mở trợ lý extension; không làm packaging trong prototype hiện tại
 
 13. Quy trình làm việc với Antigravity
 13.1 Mục tiêu khi giao việc

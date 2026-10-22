@@ -14,8 +14,8 @@ This file tracks code present in the workspace separately from acceptance eviden
 | M5 | Tkinter status/control window, calibrate, discover | Partial. Manual §7.2 checklist has not been run. |
 | M6 | ADB fallback and Android setup guide | Not verified. No Android device/scrcpy session was available for acceptance. |
 | M7 | Historical TikTok Web/Edge pilot with local tab audio, final-only decisions, Playwright sender and dry-run default | Earlier focused fake-page/protocol/CLI/extension checks passed; no TikTok account or livestream was opened. Its separate Edge profile is no longer used by the current GUI send path. |
-| M8 | Chromium extension session carries selected-tab audio and performs number actions in the same tab | Number-first decisions, fill-only default, explicit opt-in Enter dispatch, and prioritized TikTok chat-input selector are implemented; local tests pass. No browser has passed current capture/action acceptance. Exact-number accuracy and under-1-second end-to-comment latency are not accepted. Firefox/Safari/mobile and packaged onboarding remain unsupported. See `docs/BROWSER_COMPATIBILITY.md`. |
-| P1 Windows installer | PyInstaller one-directory app, NSIS per-user installer, first-run extension guide and local data paths | Rebuilt the app bundle and installer after removing the unused desktop-automation stack. The new package has not had its executable/model smoke check or installation check run. No store submission, clean-account/browser acceptance, full native/transitive SBOM, or public release clearance. See `docs/SPRINT_P1_WINDOWS_INSTALLER.md`. |
+| M8 | Chromium extension session carries selected-tab audio and performs number actions in the same tab | Number-first decisions, fill-only default, explicit opt-in Enter dispatch, prioritized TikTok chat-input selector, and GUI refresh recovery after a successful fill are implemented; local tests pass. No browser has passed current capture/action acceptance. Exact-number accuracy and under-1-second end-to-comment latency are not accepted. Firefox/Safari/mobile and packaged onboarding remain unsupported. See `docs/BROWSER_COMPATIBILITY.md`. |
+| P1 Windows installer | PyInstaller one-directory app, NSIS per-user installer, first-run extension guide and local data paths | Rebuilt on 2026-10-22. Executable/model smoke check passed; NSIS produced the installer. The finish-page option launches the setup assistant, including after first run; the user still confirms Load unpacked because this preview is not in a browser store. Installer install/uninstall smoke was not run because a NumberTyper Start Menu folder already exists. No clean-account/browser acceptance, full native/transitive SBOM, or public release clearance. See `docs/SPRINT_P1_WINDOWS_INSTALLER.md`. |
 
 ## Optional ASR candidate experiment — 2026-10-22
 
@@ -25,7 +25,7 @@ An earlier run on the user-provided Edge screen recording, 00:07–00:14, gave c
 
 ## Immediate work before relying on live sending
 
-1. Run the suite under Python 3.12 when available. In this workspace, `.venv` uses Python 3.14 and the latest full suite run on 2026-10-22 reports **165 passed**. Python 3.14 satisfies `requires-python >=3.12`, but does not replace the documented Python 3.12 reference environment.
+1. Run the suite under Python 3.12 when available. In this workspace, `.venv` uses Python 3.14 and the latest full suite run on 2026-10-22 reports **166 passed**. Python 3.14 satisfies `requires-python >=3.12`, but does not replace the documented Python 3.12 reference environment.
 2. Run a labeled local WAV replay with `--dry-run` and collect precision/recall results. The model is present and initializes; the earlier hardware record check passed and its temporary WAV was deleted after format validation.
 3. The Playwright fake-page case passed with installed Edge in the M7 checks; no TikTok page was opened.
 4. Review §7.2 GUI checklist and test F8/F10.
@@ -39,6 +39,14 @@ The repository does not yet claim full v1 acceptance. The Android user guide and
 The Windows 64-bit build now uses PyInstaller one-directory packaging and an NSIS per-user installer. The installer includes the app/runtime, local Zipformer-VI and Silero VAD resources, Vietnamese Chromium extension popup, first-run guide, Start Menu shortcut, optional Desktop shortcut, and uninstaller. Config, first-run marker, startup/crash logs and runtime logs resolve under `%LOCALAPPDATA%\NumberTyper`; uninstall leaves that user data intact. The extension bridge validates the exact ID computed from the key in its bundled manifest rather than accepting any Chromium extension origin.
 
 Local artefact before the licensing follow-up: `dist/NumberTyper-Setup-0.1.0-preview.exe` (SHA-256 `B48EA7F4FC8E76256083E9C134B4E2D8EF08E62512C7D96F5C745F9558F15C4F`). A new build is recorded later in this section. It is a personal, non-commercial preview. The upstream Zipformer model card says CC BY-NC-ND 4.0; confirm the rights for the exact ONNX release files and complete the transitive dependency SBOM before public distribution, particularly commercial distribution.
+
+### Rebuild and browser setup assistant — 2026-10-22
+
+The NSIS finish page now has an optional **Thiết lập extension trong trình duyệt** checkbox. Selecting it launches `NumberTyper.exe --setup-extension`, which reopens the browser helper even if first-run setup was previously completed. The helper opens the selected browser's extension page and the bundled extension folder together. The browser's **Developer mode → Load unpacked** confirmation remains manual; no browser policy or silent installation is applied.
+
+The app bundle and installer were rebuilt with Python 3.14.5 x64. The build script's packaged executable/model smoke check passed (`SMOKE CHECK OK: local ASR and VAD models loaded`); NSIS produced the installer. Launching the new executable with `--setup-extension` opened a responding window titled `NumberTyper — thiết lập extension trình duyệt`. No browser page or livestream was opened from that window. Installer install/uninstall smoke was not run: the safe smoke script detects an existing NumberTyper Start Menu folder and refuses to overwrite it. This is not a clean-machine install acceptance.
+
+Current local installer: `dist/NumberTyper-Setup-0.1.0-preview.exe` (SHA-256 `AED42DE9BA2D957C9D10E3B88FB09EF8AD2262A2FE2FF19ED2DF76F311434AAD`). The extension ZIP hash remains `7C1402F77A9648F9749580EC50D5536B8E19CAA140ABAADC3BC7BA7669BC95F6`.
 
 Checks actually run:
 
@@ -198,3 +206,11 @@ Added `Vosk số` as an optional fourth lane in the YouTube ASR comparison windo
 The same in-memory 00:06–00:08 overlap segment with labels `[2000, 3000]` was re-run with the final 1,341-phrase grammar. It produced: Vosk `rồi`, no numbers, 1295.9 ms; Vosk number grammar `rồi`, no numbers, 31.0 ms; Zipformer `RỒI BA MẸ`, parsed `[3]`, 44.2 ms. Model and recognizer setup are excluded from these inference measurements. All three miss the two expected labels; Zipformer also has one extra parsed candidate. One segment is not a valid latency distribution or accuracy claim. Audio was not written to disk.
 
 Checks: .venv\Scripts\python.exe -m pytest -q → 161 passed; focused ASR comparison tests passed (19 tests); Ruff check passed; compileall -q src tests passed; Ruff format check passed for the new Vosk engine/grammar files. No TikTok/live interaction or send action was run.
+
+## M8 GUI refresh freeze after successful fill — 2026-10-22
+
+The reported symptom was that `Nghe được` and the tab RMS meter stopped refreshing after F8 enabled number filling, while a recognized number could still be filled. Code review found a deterministic UI failure path: a successful draft event includes `error=None`, but the Tk poll called `.startswith()` on that value. The callback then exited before scheduling its next poll, leaving the ASR/audio indicators and displayed state stale while pipeline workers continued. The local session log showed successful draft events followed by later pipeline decisions, which is consistent with a stopped UI poll; it does not provide a captured Tk exception traceback.
+
+The UI now treats absent/None error text as an ordinary successful draft, keeps the poll callback scheduled even if one UI update fails, logs and shows the error, and disarms on an unexpected polling exception. Regression tests cover None error text and the unverified-Enter marker. This does not stop audio/ASR on F8; it keeps recognition independent from the action toggle.
+
+Checks run: full `.venv\Scripts\python.exe -m pytest -q` → **170 passed**; focused GUI, pipeline logging, and extension-sender checks → **15 passed**; Ruff formatting passed; Ruff `E/F/I` checks passed with the repository's existing `E501` long-line exclusions. A broader check of `gui.py` still reports 10 pre-existing `BLE001`/`S110` findings elsewhere in that module. The updated separate executable passed `--smoke-check` (exit 0; local ASR/VAD loaded), and NSIS built `dist/NumberTyper-Setup-0.1.0-preview-ui-fix.exe` (SHA-256 `B3B6BC1908B58B9E31A32AC8895FD1670AD47BB503F352343019457E77A74334`). The installer was not run over the currently active app/browser session. No live TikTok/extension session was manipulated for this fix. Manual verification with the user's browser remains needed; the running older executable must be restarted to load the fix.

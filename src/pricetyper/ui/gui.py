@@ -2,8 +2,8 @@ from __future__ import annotations
 
 import queue
 import threading
-import tkinter as tk
 import time
+import tkinter as tk
 from datetime import datetime
 from tkinter import messagebox, ttk
 
@@ -23,6 +23,10 @@ from pricetyper.ui.audio_meter import format_audio_level
 from pricetyper.ui.formatting import format_vnd
 from pricetyper.ui.hotkeys import register
 from pricetyper.ui.recognition_display import RecognitionDisplay
+
+
+def _is_unverified_send_error(error: object) -> bool:
+    return isinstance(error, str) and error.startswith("send_unverified:")
 
 
 def launch(
@@ -749,9 +753,13 @@ def launch(
                         recognized.set(item["text"][:80] or "—")
                 elif kind == "audio_level" and tab_capture_mode:
                     audio_level.set(format_audio_level(item["rms"]))
-                    if tiktok_web and not asr_status_state["stall_warning"] and (
-                        time.monotonic_ns() - asr_status_state["last_event_ns"]
-                        >= 1_500_000_000
+                    if (
+                        tiktok_web
+                        and not asr_status_state["stall_warning"]
+                        and (
+                            time.monotonic_ns() - asr_status_state["last_event_ns"]
+                            >= 1_500_000_000
+                        )
                     ):
                         asr_status.set(
                             "Tab có tín hiệu · Zipformer chờ VAD chốt câu; không hiện từng từ"
@@ -844,9 +852,7 @@ def launch(
                 elif kind in {"send", "draft", "preview"}:
                     if item["ok"]:
                         totals["sent"] += 1
-                        unverified = item.get("error", "").startswith(
-                            "send_unverified:"
-                        )
+                        unverified = _is_unverified_send_error(item.get("error"))
                         action = (
                             "điền"
                             if kind == "draft"
@@ -927,8 +933,32 @@ def launch(
                 add_log(message)
                 asr_status.set("ASR chậm/không phản hồi · đã tắt thao tác")
                 show_health_warning("asr_stalled", message, level="error")
-        if root.winfo_exists():
-            root.after(poll_interval_ms, poll)
+
+    def poll_safely():
+        try:
+            poll()
+        except Exception as exc:  # noqa: BLE001 - keep GUI refresh alive on bad UI events
+            controller.disarm()
+            logger.log(
+                "ui_poll_error",
+                error_type=type(exc).__name__,
+                message=str(exc),
+            )
+            try:
+                add_log(f"Lỗi cập nhật giao diện: {type(exc).__name__}: {exc}")
+                show_health_warning(
+                    "ui_poll_error",
+                    "Giao diện gặp lỗi khi cập nhật trạng thái. NumberTyper đã tự "
+                    "tắt điền/gửi; hãy kiểm tra trước khi bật lại.",
+                    level="error",
+                )
+            except tk.TclError:
+                pass
+        try:
+            if root.winfo_exists():
+                root.after(poll_interval_ms, poll_safely)
+        except tk.TclError:
+            pass
 
     thread = threading.Thread(target=pipeline.run, name="pipeline", daemon=True)
     thread.start()
@@ -947,7 +977,7 @@ def launch(
         root.destroy()
 
     root.protocol("WM_DELETE_WINDOW", close_window)
-    root.after(poll_interval_ms, poll)
+    root.after(poll_interval_ms, poll_safely)
     if config.run.start_armed:
         root.after(0, lambda: threading.Thread(target=toggle, daemon=True).start())
     root.mainloop()
