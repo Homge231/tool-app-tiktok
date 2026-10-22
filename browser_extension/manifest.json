@@ -2,7 +2,7 @@
   "manifest_version": 3,
   "name": "NumberTyper Tab Audio",
   "version": "0.1.0",
-  "description": "Captures selected-tab audio for local NumberTyper processing and can fill or submit a number in the same tab.",
+  "description": "Captures selected-tab audio for local NumberTyper processing and can fill or submit @-prefixed numbers in the same tab.",
   "permissions": [
     "activeTab",
     "offscreen",

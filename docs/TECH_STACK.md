@@ -20,7 +20,7 @@ TikTok final candidate
   → cùng WebSocket extension bridge → kiểm tra tab ID/host/path/input → dispatch action trong tab đã capture
 ```
 
-Extension chỉ capture tab người dùng chọn và không đọc lịch sử chat/bình luận. TikTok mặc định chỉ điền số final; người dùng có thể bật tùy chọn Enter khi disarmed, rồi F8 mới cho phép thao tác. Acknowledgement Enter chỉ xác nhận event được dispatch, chưa chứng minh comment đã xuất hiện. Chế độ so sánh giữ tối đa 20 giây audio của một đoạn trong RAM rồi xóa; audio không gửi cloud hoặc ghi file.
+Extension chỉ capture tab người dùng chọn và không đọc lịch sử chat/bình luận. TikTok mặc định chỉ điền số final với tiền tố `@` (ví dụ `@122`); người dùng có thể bật tùy chọn Enter khi disarmed, rồi F8 mới cho phép thao tác. Acknowledgement Enter chỉ xác nhận event được dispatch, chưa chứng minh comment đã xuất hiện. Chế độ so sánh giữ tối đa 20 giây audio của một đoạn trong RAM rồi xóa; audio không gửi cloud hoặc ghi file.
 
 ## Công nghệ
 

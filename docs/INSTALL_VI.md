@@ -29,7 +29,7 @@ Extension chỉ cấp âm thanh của tab đã chọn và yêu cầu thao tác s
 
 - Ứng dụng khởi động ở chế độ chạy thử/chưa kích hoạt. Nó không tự điền hoặc gửi comment.
 - Sau khi tab đã được kiểm tra, F8 bật thao tác số; F10 dừng khẩn.
-- Mặc định chỉ điền số vào ô chat. Gửi bằng Enter cần bật lựa chọn riêng trong ứng dụng.
+- TikTok Web mặc định điền số vào ô chat theo dạng `@<số>` (ví dụ `@122`). Gửi bằng Enter cần bật lựa chọn riêng trong ứng dụng.
 - Enter chỉ được xác nhận là đã phát lệnh; ứng dụng không xác nhận comment đã xuất hiện trên TikTok.
 - Không dùng livestream thật trong kiểm thử tự động.
 

@@ -10,7 +10,7 @@ function localizeError(message) {
     ['No selected tab is connected.', 'Chưa có tab được kết nối.'],
     ['The selected tab is no longer the captured TikTok Live page.', 'Tab đã chọn không còn là trang TikTok Live đang thu.'],
     ['Unsupported tab action.', 'Thao tác trên tab này không được hỗ trợ.'],
-    ['Only an ASCII number can be filled into the chat input.', 'Ứng dụng chỉ điền được số vào ô chat.'],
+    ['The chat comment must be an @-prefixed ASCII number.', 'Nội dung comment phải là @ theo sau bởi số.'],
     ['A configured chat input selector is invalid.', 'Cấu hình ô nhập chat không hợp lệ.'],
     ['No visible chat input matched the configured selectors.', 'Không tìm thấy ô chat đang hiển thị trên tab.']
   ]);

@@ -56,8 +56,11 @@ class BrowserExtensionSender:
 
     def send(self, text: str) -> SendResult:
         start = time.perf_counter_ns()
-        if not text.isascii() or not re.fullmatch(r"[0-9]+", text):
-            raise ValueError("browser extension sender accepts ASCII digits only")
+        if not text.isascii() or not re.fullmatch(r"@?[0-9]+", text):
+            raise ValueError(
+                "browser extension sender accepts an optional @ followed by ASCII digits"
+            )
+        comment_text = text if text.startswith("@") else f"@{text}"
         session = self.source.session
         current_session = (
             (session["tab_id"], session["host"], session["path"])
@@ -80,7 +83,7 @@ class BrowserExtensionSender:
             result = self.source.request_tab_action(
                 {
                     "action": action_name,
-                    "text": text,
+                    "text": comment_text,
                     "selectors": self.selectors,
                 }
             )

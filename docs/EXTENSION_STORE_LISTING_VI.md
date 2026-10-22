@@ -18,7 +18,7 @@ Trạng thái: bản nháp nội bộ, chưa gửi xét duyệt. Kênh đầu ti
 
 NumberTyper Tab Audio kết nối tab trình duyệt do bạn chủ động chọn với ứng dụng NumberTyper đang chạy trên chính máy tính. Ứng dụng desktop xử lý tiếng Việt và trích số tại chỗ bằng model cục bộ.
 
-Bạn tự bắt đầu và dừng việc thu audio từ tab. Extension chuyển các khung audio tới ứng dụng cục bộ qua địa chỉ loopback trên máy (`127.0.0.1`); audio không được gửi tới dịch vụ đám mây. Trong chế độ TikTok thử nghiệm, extension có thể điền một số vào ô nhập của cùng tab sau khi bạn chủ động kết nối. Gửi bằng Enter cần bật riêng trong ứng dụng và kích hoạt bằng F8. Mặc định ứng dụng chạy thử/chưa kích hoạt và chỉ điền số. Kết quả nhận dạng có thể sai; extension không xác nhận rằng TikTok đã nhận hoặc hiển thị bình luận.
+Bạn tự bắt đầu và dừng việc thu audio từ tab. Extension chuyển các khung audio tới ứng dụng cục bộ qua địa chỉ loopback trên máy (`127.0.0.1`); audio không được gửi tới dịch vụ đám mây. Trong chế độ TikTok thử nghiệm, extension có thể điền số theo dạng `@<số>` (ví dụ `@122`) vào ô nhập của cùng tab sau khi bạn chủ động kết nối. Gửi bằng Enter cần bật riêng trong ứng dụng và kích hoạt bằng F8. Mặc định ứng dụng chạy thử/chưa kích hoạt và chỉ điền `@<số>`. Kết quả nhận dạng có thể sai; extension không xác nhận rằng TikTok đã nhận hoặc hiển thị bình luận.
 
 Extension không đọc danh sách bình luận, nội dung chat, cookie, mật khẩu hoặc thông tin đăng nhập. Không dùng extension để tự mua hàng hoặc tự động thanh toán.
 
@@ -37,7 +37,7 @@ Extension không đọc danh sách bình luận, nội dung chat, cookie, mật 
 
 - **Âm thanh:** Được chuyển tới ứng dụng NumberTyper cục bộ chỉ sau khi người dùng bắt đầu capture; xử lý trong bộ nhớ, không ghi thành tệp bởi extension.
 - **Thông tin tab:** Tab ID, host và path được gửi tới ứng dụng loopback để khóa capture và thao tác vào đúng tab. Không gửi sang nhà phát triển.
-- **Nội dung trang:** Probe chỉ đọc thuộc tính của input hiển thị. Khi có yêu cầu điền số, extension đọc riêng nội dung của chính input đó để từ chối ghi đè bản nháp và xác nhận các chữ số vừa điền; không lấy danh sách/nội dung chat hoặc bình luận, cookie hay credential.
+- **Nội dung trang:** Probe chỉ đọc thuộc tính của input hiển thị. Khi có yêu cầu điền số, extension đọc riêng nội dung của chính input đó để từ chối ghi đè bản nháp và xác nhận văn bản `@<số>` vừa điền; không lấy danh sách/nội dung chat hoặc bình luận, cookie hay credential.
 - **Thu thập, bán hoặc chia sẻ dữ liệu:** Bản nháp khai báo là không thu thập, không bán và không chia sẻ dữ liệu với nhà phát triển hay bên thứ ba. Cần đối chiếu lại với phiên bản đã phát hành và yêu cầu biểu mẫu cửa hàng trước khi nộp.
 - **Xử lý:** ASR chạy trong ứng dụng desktop. Không có API speech cloud trong sản phẩm hiện tại.
 

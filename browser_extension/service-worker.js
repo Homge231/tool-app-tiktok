@@ -48,9 +48,9 @@ async function performTabAction(action) {
   }
   if (
     ['draft', 'submit'].includes(action.action) &&
-    (typeof action.text !== 'string' || !/^[0-9]+$/.test(action.text))
+    (typeof action.text !== 'string' || !/^@[0-9]+$/.test(action.text))
   ) {
-    return {ok: false, error: 'Only an ASCII number can be filled into the chat input.'};
+    return {ok: false, error: 'The chat comment must be an @-prefixed ASCII number.'};
   }
   const selectors = Array.isArray(action.selectors) ? action.selectors : [];
   const [execution] = await chrome.scripting.executeScript({

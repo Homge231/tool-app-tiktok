@@ -6,7 +6,7 @@
 
 NumberTyper Tab Audio chỉ bắt đầu thu audio sau khi người dùng chủ động chọn tab và bấm nút bắt đầu trong extension. Extension chuyển audio của tab qua kết nối loopback `127.0.0.1` tới ứng dụng NumberTyper trên cùng máy. Extension không gửi audio tới máy chủ của nhà phát triển hoặc dịch vụ nhận dạng đám mây, và không ghi raw audio thành tệp.
 
-Extension chuyển tab ID, hostname và đường dẫn của tab tới ứng dụng cục bộ để khóa audio và thao tác vào đúng tab. Khi được yêu cầu điền số, extension đọc nội dung của chính ô nhập đã chọn để tránh ghi đè bản nháp có sẵn và kiểm tra số vừa điền. Nó không lấy danh sách hoặc nội dung bình luận/chat, cookie, mật khẩu hay thông tin đăng nhập.
+Extension chuyển tab ID, hostname và đường dẫn của tab tới ứng dụng cục bộ để khóa audio và thao tác vào đúng tab. Khi được yêu cầu điền số, extension đọc nội dung của chính ô nhập đã chọn để tránh ghi đè bản nháp có sẵn và kiểm tra văn bản `@<số>` vừa điền. Nó không lấy danh sách hoặc nội dung bình luận/chat, cookie, mật khẩu hay thông tin đăng nhập.
 
 Ứng dụng desktop xử lý âm thanh bằng model local. Ứng dụng có thể ghi transcript/số nhận dạng và trạng thái lỗi vào log cục bộ theo cấu hình; người dùng có thể xóa log trong `%LOCALAPPDATA%\NumberTyper\logs`. Raw audio không được lưu thành file bởi pipeline nhận dạng.
 
@@ -19,11 +19,11 @@ Extension chuyển tab ID, hostname và đường dẫn của tab tới ứng d�
 
 ## Quyền của extension
 
-`tabCapture` lấy audio của tab được chọn; `activeTab` xác định tab sau thao tác người dùng; `offscreen` duy trì luồng xử lý audio; `scripting` probe ô nhập hiển thị và điền số theo yêu cầu; `storage` giữ trạng thái capture tối thiểu; quyền host `http://127.0.0.1/*` kết nối tới app cục bộ.
+`tabCapture` lấy audio của tab được chọn; `activeTab` xác định tab sau thao tác người dùng; `offscreen` duy trì luồng xử lý audio; `scripting` probe ô nhập hiển thị và điền số theo dạng `@<số>` theo yêu cầu; `storage` giữ trạng thái capture tối thiểu; quyền host `http://127.0.0.1/*` kết nối tới app cục bộ.
 
 ## Thao tác TikTok
 
-Chế độ TikTok là thử nghiệm. Ứng dụng mặc định chạy thử/chưa kích hoạt và chỉ điền số sau khi người dùng chủ động kết nối, bỏ chế độ chạy thử và nhấn F8. Gửi Enter là lựa chọn riêng; extension không xác nhận TikTok đã nhận hoặc hiển thị bình luận. Kết quả nhận dạng có thể sai.
+Chế độ TikTok là thử nghiệm. Ứng dụng mặc định chạy thử/chưa kích hoạt và chỉ điền số theo dạng `@<số>` sau khi người dùng chủ động kết nối, bỏ chế độ chạy thử và nhấn F8. Gửi Enter là lựa chọn riêng; extension không xác nhận TikTok đã nhận hoặc hiển thị bình luận. Kết quả nhận dạng có thể sai.
 
 ## Liên hệ và cập nhật
 
