@@ -38,7 +38,7 @@ TikTok Web prototype (Chromium extension; initially dry-run and disarmed):
 .\run-tiktok-web.ps1
 ```
 
-Open the Live page in a Chromium browser and start capture from the NumberTyper extension. In the app, connect/probe that same tab; it remains disarmed until F8. The app defaults to fill-only; enable the Enter-submit checkbox while disarmed if you want automatic submission. F10 is emergency stop. `discover --tiktok-web` is deprecated because the extension probes the selected tab. Automated sender checks use a local fake page and must not be run against a real livestream.
+Open the Live page in a Chromium browser and start capture from the NumberTyper extension. In the app, connect/probe that same tab; it remains disarmed until F8. TikTok mode preselects automatic Enter submission of `@<number>` after tab connection; uncheck the option for fill-only. F10 is emergency stop. `discover --tiktok-web` is deprecated because the extension probes the selected tab. Automated sender checks use a local fake page and must not be run against a real livestream.
 
 The YouTube launcher and extension workflow are documented in `docs/PROTOTYPE_YOUTUBE.md`.
 

@@ -48,7 +48,9 @@ def launch(
         raise ValueError("ASR comparison is available only in YouTube test mode")
 
     root = tk.Tk()
-    submit_live = tk.BooleanVar(value=False)
+    # TikTok mode defaults to auto-submit after the user connects the tab.
+    # The app still starts disarmed and requires an explicit F8 press.
+    submit_live = tk.BooleanVar(value=tiktok_web)
     root.title(
         "NumberTyper — YouTube · Zipformer-VI"
         if youtube_test
@@ -225,8 +227,8 @@ def launch(
             root,
             text=(
                 "Mở TikTok Live trong trình duyệt, bấm extension và bắt đầu thu tab. "
-                "App nhận dạng số cuối câu trên đúng tab đó. Mặc định chỉ điền số; "
-                "có thể bật gửi bằng Enter ở ô chat. Dòng Nghe được chỉ đổi sau khi "
+                "App nhận dạng số cuối câu trên đúng tab đó. Mặc định chọn tự gửi "
+                "bằng Enter sau khi kết nối; bỏ chọn nếu chỉ muốn điền số. Dòng Nghe được chỉ đổi sau khi "
                 "VAD chốt câu; bấm F8 hoặc kết nối tab không dừng nhận dạng. "
                 "Chỉ ASR final mới được xử lý. "
                 "TikTok tắt giải mã partial lặp lại để giảm nghẽn audio; "
@@ -639,7 +641,9 @@ def launch(
         )
         if submit_mode_check is not None:
             submit_mode_check.configure(state="normal")
-        state.set("TAB SẴN SÀNG — NHẤN F8 ĐỂ ĐIỀN SỐ")
+            set_tiktok_submit_mode()
+        else:
+            state.set("TAB SẴN SÀNG — NHẤN F8 ĐỂ ĐIỀN SỐ")
         add_log("Tab TikTok Live và ô nhập đã sẵn sàng; app vẫn disarmed cho tới F8.")
 
     def on_state(new_state):
