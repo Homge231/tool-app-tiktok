@@ -1,11 +1,15 @@
 # PriceTyper agent instructions
 
+## Session continuity — Obsidian second brain
+
+This repository contains an Obsidian vault at `second-brain/`. At the start of each project session, read `second-brain/00-Start-Here.md`, then `Current-State.md`, `Plan.md`, and the latest dated entry in `Timeline.md`. At the end of each session, update the current state and plan and append a dated timeline entry. Record only verified facts; label assumptions, planned work, and unverified behavior explicitly. Keep detailed technical procedures in `docs/` and link to them instead of duplicating them in the vault.
+
 Before changing code, read `docs/SPEC.md` and the relevant rules under `.agents/rules/`. This repository builds a local Python application for Windows. It is not a website or a hosted service.
 
 ## Current prototype scope
 
 - The YouTube experiment remains number-first and recognition-only: capture audio from the user-selected browser tab, run local Vietnamese ASR and number parsing, and show the recognized text/numeric value without applying the price gate.
-- The legacy M7 `--tiktok-web` path used a dedicated Edge profile. The M8 path uses the Chromium extension bridge to capture audio and act on the same user-selected TikTok Live tab. It is number-first: it bypasses the price minimum/context gate and considers only finalized ASR text. It starts disarmed in dry-run and defaults to fill-only. A separate unchecked option enables one Enter action after the number is filled; the user must connect/probe the tab, leave dry-run, enable that option, and press F8. The action acknowledgement does not prove that TikTok displayed the comment. No browser, ASR accuracy, or end-to-end latency acceptance is claimed for M8 yet.
+- The legacy M7 `--tiktok-web` path used a dedicated Edge profile. The M8 path uses the Chromium extension bridge to capture audio and act on the same user-selected TikTok Live tab. It is number-first: it bypasses the price minimum/context gate and considers only finalized ASR text. In TikTok mode, auto-submit of `@<number>` is preselected after a successful tab probe; dry-run remains on and the action remains disarmed until the user turns dry-run off and presses F8. Fill-only remains available. The action acknowledgement does not prove that TikTok displayed the comment. No browser, ASR accuracy, or end-to-end latency acceptance is claimed for M8 yet.
 - The requested next product target is browser-independent desktop support. Implement browser-specific adapters behind the shared local ASR/number pipeline; support only browser/OS combinations whose selected-tab audio capture and same-tab sender have been tested. Never promise compatibility with every browser by name alone. If a browser cannot provide the selected tab's audio, report it as unsupported rather than silently switching to microphone or system-wide loopback.
 - Keep M7 as the tested historical Edge/Windows baseline; M8 is in progress. The compatibility targets and evidence live in `docs/BROWSER_COMPATIBILITY.md`.
 - The current small Vosk model is only a baseline; robustness to music, noise, regional accents, and overlapping speakers is an unmet requirement until measured on labeled audio.
@@ -20,7 +24,7 @@ Before changing code, read `docs/SPEC.md` and the relevant rules under `.agents/
 
 - Implement one milestone from §12 at a time. Do not silently expand scope.
 - Keep parser, gate, and decision logic independent from the UI, audio capture, ASR, and senders.
-- The default state is LISTENING/disarmed. F8 toggles the enabled action; F10 is emergency stop. Dry-run must never call a real sender. TikTok defaults to fill-only; comment submission requires the explicit opt-in checkbox plus leaving dry-run and pressing F8.
+- The default action state is disarmed. F8 toggles the enabled action; F10 is emergency stop. Dry-run must never call a real sender. In TikTok mode, auto-submit of `@<number>` is preselected after a successful tab probe, but requires leaving dry-run and pressing F8. Fill-only remains selectable. Do not imply that synthetic Enter guarantees a visible/accepted comment.
 - Do not read or scrape chat, comments, credentials, cookies, or other viewers' data. Do not add evasion, automated checkout, or rate-limit bypass behavior.
 - Validate sender preparation before arming. An action failure is not retried. Keep the final armed check immediately before the sender action. A dispatched Enter is an unverified request; do not report the comment as visible without allowed evidence.
 - Use the fake local page or NullSender for sender checks. Never use a real livestream as a test fixture.

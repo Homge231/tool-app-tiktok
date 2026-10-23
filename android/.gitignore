@@ -1,0 +1,7 @@
+.gradle/
+local.properties
+**/build/
+app/src/main/assets/model/
+app/libs/sherpa-onnx-1.13.8.aar
+*.apk
+*.aab

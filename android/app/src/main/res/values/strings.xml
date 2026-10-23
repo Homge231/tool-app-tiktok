@@ -1,0 +1,4 @@
+<resources>
+    <string name="app_name">NumberTyper</string>
+    <string name="accessibility_service_description">Chỉ nhập số nhận dạng vào ô đang được focus trong TikTok khi bạn đã arm ứng dụng. Không đọc nội dung chat.</string>
+</resources>

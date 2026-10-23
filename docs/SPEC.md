@@ -31,7 +31,7 @@ Yêu cầu sản phẩm tiếp theo là dùng được trên nhiều trình duy�
 • TikTok Web prototype (M8 đang triển khai, chưa nghiệm thu): Windows + extension Chromium, capture audio cục bộ và xử lý số cuối của ASR final trong cùng tab TikTok Live đã chọn. Number mode bỏ qua price gate nên có thể chọn số nhỏ; chế độ chỉ điền thay liên tục bản nháp số trong ô nhập, còn chế độ gửi bằng Enter chỉ dùng ô trống. Số nhận dạng vẫn hiển thị dạng thuần trong app. Chế độ gửi cần rời dry-run và nhấn F8; không gửi từ partial, không thử lại, không xác nhận được comment xuất hiện. Mục tiêu người dùng là dưới 1 giây từ âm cuối đến lúc comment xuất hiện, nhưng phần xử lý local và việc TikTok phân phối comment là hai khoảng khác nhau; không thể bảo đảm thời gian phân phối phía TikTok. P95 local đến lúc phát Enter cần được đo từ audio có nhãn. Exact-number accuracy phải đánh giá riêng, không đánh đổi độ đúng để đạt tốc độ. Browser, độ chính xác và latency chưa được chấp nhận.
 • Không dùng livestream thật làm fixture kiểm thử tự động; việc nhận dạng/audio chưa được chấp nhận phải được ghi riêng trong status.
 • Bản phát hành mục tiêu: ứng dụng Windows cài đặt được, có shortcut/uninstaller và đóng gói runtime; chưa thuộc prototype.
-• Android/scrcpy là hướng riêng ở giai đoạn sau.
+• Android: M6 là đường điều khiển điện thoại qua PC bằng scrcpy/ADB. Theo yêu cầu ngày 2026-10-23, M9 bổ sung APK Android native thử nghiệm, dùng Playback Capture theo UID TikTok, ASR cục bộ và AccessibilityService để điền số. Tương thích phải được thử trên từng thiết bị; TikTok có thể chặn capture và thao tác gửi có thể không được ứng dụng chấp nhận.
 1.4 Ngoài phạm vi v1
 • iOS: không có đường thu âm thanh và điều khiển đã xác minh (U11).
 • Giá có “triệu” (ví dụ “một triệu hai”) và dải “nghìn + số” (ví dụ “một nghìn hai trăm”): bị bỏ qua, không gửi.
@@ -54,10 +54,14 @@ TikTok Live trên Chromium/Windows (M8 prototype)
 Extension tabCapture của tab TikTok Live người dùng chọn
 Action extension trong cùng tab; chỉ sau khi rời dry-run và F8
 Code ban đầu có; chưa kiểm tra browser/action thực tế, chưa chấp nhận
-App Android ≥ 11
+Android qua scrcpy trên Android ≥ 11 (M6)
 scrcpy rồi loopback PC
 desktop trên cửa sổ scrcpy; dự phòng adb
-Tích hợp tương lai
+Có hướng dẫn; chưa nghiệm thu trên thiết bị trong lần đánh giá này
+NumberTyper APK Android ≥ 11 (M9 prototype)
+MediaProjection/AudioPlaybackCapture lọc theo UID TikTok; chỉ có audio nếu TikTok cho phép capture
+AccessibilityService thao tác ô đang focus; Enter là yêu cầu chưa xác nhận comment
+APK debug build thành công; chưa nghiệm thu capture, ASR hoặc thao tác trên điện thoại thật
 App Android ≤ 10
 scrcpy không thu được âm thanh (ĐÃ XÁC MINH)
 —
@@ -1592,7 +1596,7 @@ Cài và mở trên tài khoản Windows sạch không cần Python hoặc Power
 
 13. Quy trình làm việc với Antigravity
 13.1 Mục tiêu khi giao việc
-Antigravity là agent lập trình làm việc trực tiếp trong thư mục dự án. Sản phẩm cuối vẫn là ứng dụng cài đặt Windows theo §1; không chuyển thành website hay dịch vụ web. YouTube recognition và TikTok Web sender là hai chế độ riêng; TikTok pilot chưa được coi là nghiệm thu ASR/latency. Android và P1 đóng gói là các mốc sau. Agent phải đọc `AGENTS.md`, quy tắc trong `.agents/rules/` và `docs/SPEC.md` trước khi sửa mã.
+Antigravity là agent lập trình làm việc trực tiếp trong thư mục dự án. Sản phẩm gồm ứng dụng Windows theo §1 và APK Android thử nghiệm M9; không chuyển thành website hay dịch vụ web. YouTube recognition và TikTok sender là các chế độ riêng; TikTok pilot chưa được coi là nghiệm thu ASR/latency. P1 đóng gói Windows vẫn là mốc riêng. Agent phải đọc `AGENTS.md`, quy tắc trong `.agents/rules/` và `docs/SPEC.md` trước khi sửa mã.
 
 Một lần giao việc nên chỉ tập trung vào một mốc, nêu rõ:
 • Mã mốc và các module được phép sửa.
