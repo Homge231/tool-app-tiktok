@@ -60,7 +60,7 @@ async function performTabAction(action) {
       text: action.text || '',
       selectors
     }],
-    func: (payload) => {
+    func: async (payload) => {
       const visible = (element) => Boolean(
         element && element.getClientRects().length &&
         getComputedStyle(element).visibility !== 'hidden' &&
@@ -156,6 +156,8 @@ async function performTabAction(action) {
         input.dispatchEvent(new Event('change', {bubbles: true}));
       }
 
+      // Flush page updates triggered by the input event before verifying or submitting.
+      await Promise.resolve();
       const entered = String(input.isContentEditable
         ? input.textContent
         : ('value' in input ? input.value : input.textContent)).trim();
