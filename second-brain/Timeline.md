@@ -7,7 +7,7 @@
 - Thay checkbox chọn gửi bằng radio “Chỉ điền số · thay số cũ” / “Gửi @+số bằng Enter”; giữ dry-run, F8 và F10.
 - Kiểm tra tĩnh chạy trong phiên: `node --check browser_extension/service-worker.js`; `.venv\Scripts\python.exe -m py_compile` trên sender, decider, pipeline, GUI; `git diff --check` — đều đạt. Không chạy automated tests, không mở GUI/TikTok, không build installer.
 - TikTok vẫn chưa được kiểm tra lại: comment cũ từng hiện thiếu `@` dù ô trước Enter có `@123`. Vì app không đọc chat, chỉ có thể xác nhận rằng lệnh gửi/ô trước Enter chứa `@<số>`, không khẳng định comment đã hiện đúng.
-- Git push được yêu cầu; trước khi ghi mục hoàn tất cần lưu commit/push hash và trạng thái remote. Android/M9 thay đổi có sẵn trong working tree là phần riêng và chưa được gộp vào M8.
+- Commit `023a178` (`fix: replace TikTok number drafts continuously`) đã push thành công lên `origin/master`. Android/M9 và các chỉnh sửa ngoài M8 vẫn là thay đổi local chưa commit.
 
 ## 2026-10-23 — Tạo Obsidian Second Brain
 

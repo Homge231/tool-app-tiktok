@@ -6,7 +6,7 @@ Cập nhật: 2026-10-23
 
 ## P0 — Kiểm chứng luồng TikTok hiện tại
 
-- [ ] Chạy bản app có thay đổi mới nhất và nạp/cập nhật extension tương ứng; installer preview chưa được build lại cho thay đổi này.
+- [ ] Chạy code commit `023a178` đã push và nạp/cập nhật extension tương ứng; installer preview chưa được build lại cho thay đổi này.
 - [ ] Kiểm tra tab Live được chọn: bridge báo kết nối, RMS thay đổi, transcript vẫn cập nhật khi bấm F8 bật/tắt thao tác.
 - [ ] Dry-run: xác nhận số nhận diện không tạo comment thật.
 - [ ] Fill-only: xác nhận app điền số thuần vào ô; khi nhận số tiếp theo, thay bản nháp số cũ và không gửi.

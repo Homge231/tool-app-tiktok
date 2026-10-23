@@ -18,7 +18,7 @@ Cập nhật: 2026-10-23
 
 ## Bằng chứng gần nhất
 
-- Repo ở commit `2bf0186` (`fix: flush TikTok input before submit`) trước thay đổi M8/Second Brain đang chờ commit; nhánh `master`, remote `https://github.com/Homge231/tool-app-tiktok.git`.
+- Repo ở commit `023a178` (`fix: replace TikTok number drafts continuously`), đã push thành công lên `origin/master` ngày 2026-10-23.
 - Build preview hiện được ghi nhận tại `dist/NumberTyper-Setup-0.1.0-preview.exe`, SHA-256 `D72B30FFE1A6BCC3CC35CE1F67E4DB69B254A31967B207BCF1CD50DC97E3DFEF`. Bản build/model smoke check đã chạy thành công theo nhật ký phiên trước.
 - Người dùng từng báo app đã nhận diện và điền số vào TikTok; trước đó có đo khoảng 2 giây, nhưng chưa có benchmark đồng bộ và lặp lại.
 - Chưa xác minh rằng comment thật xuất hiện thành công trên Live với cơ chế Enter hiện tại. Extension dùng synthetic DOM Enter (`isTrusted=false`), TikTok có thể bỏ qua.
