@@ -42,26 +42,36 @@ class Decider:
         cfg: DeciderCfg | None = None,
         armed: bool = False,
         candidate_scope: str = "price",
+        draft_only: bool = False,
     ):
         if candidate_scope not in {"number", "price"}:
             raise ValueError("candidate_scope must be 'number' or 'price'")
         self.gate_cfg, self.cfg, self.armed = gate_cfg or GateCfg(), cfg or DeciderCfg(), armed
         self.candidate_scope = candidate_scope
+        self.draft_only = draft_only
         self.pending: Pending | None = None
         self.handled: set[int] = set()
         self.sent: list[tuple[int, int]] = []
 
     def _decide(self, pending: Pending, t_ms: int) -> Decision:
         c, value = self.cfg, pending.value
-        if any(v == value and t_ms - sent_at < c.cooldown_same_s * 1000 for sent_at, v in self.sent):
-            return Decision(t_ms, value, 'skip', 'cooldown_same', pending.t_audio)
-        if self.sent and t_ms - self.sent[-1][0] < c.cooldown_any_s * 1000:
-            return Decision(t_ms, value, 'skip', 'cooldown_any', pending.t_audio)
-        if sum(t_ms - sent_at < 60000 for sent_at, _ in self.sent) >= c.max_per_min:
-            return Decision(t_ms, value, 'skip', 'rate_limit', pending.t_audio)
+        if not self.draft_only:
+            if any(
+                v == value and t_ms - sent_at < c.cooldown_same_s * 1000
+                for sent_at, v in self.sent
+            ):
+                return Decision(t_ms, value, 'skip', 'cooldown_same', pending.t_audio)
+            if self.sent and t_ms - self.sent[-1][0] < c.cooldown_any_s * 1000:
+                return Decision(t_ms, value, 'skip', 'cooldown_any', pending.t_audio)
+            if (
+                sum(t_ms - sent_at < 60000 for sent_at, _ in self.sent)
+                >= c.max_per_min
+            ):
+                return Decision(t_ms, value, 'skip', 'rate_limit', pending.t_audio)
         if not self.armed:
             return Decision(t_ms, value, 'skip', 'disarmed', pending.t_audio)
-        self.sent.append((t_ms, value))
+        if not self.draft_only:
+            self.sent.append((t_ms, value))
         return Decision(t_ms, value, 'send', 'ok', pending.t_audio)
 
     def _release(self, now: int) -> list[Decision]:

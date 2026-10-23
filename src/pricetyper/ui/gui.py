@@ -227,8 +227,9 @@ def launch(
             root,
             text=(
                 "Mở TikTok Live trong trình duyệt, bấm extension và bắt đầu thu tab. "
-                "App nhận dạng số cuối câu trên đúng tab đó. Mặc định chọn tự gửi "
-                "bằng Enter sau khi kết nối; bỏ chọn nếu chỉ muốn điền số. Dòng Nghe được chỉ đổi sau khi "
+                "App nhận dạng số cuối câu trên đúng tab đó. Sau khi kết nối, chọn "
+                "Chỉ điền số thô để thay số cũ, hoặc Gửi @+số bằng Enter. "
+                "Dòng Nghe được chỉ đổi sau khi "
                 "VAD chốt câu; bấm F8 hoặc kết nối tab không dừng nhận dạng. "
                 "Chỉ ASR final mới được xử lý. "
                 "TikTok tắt giải mã partial lặp lại để giảm nghẽn audio; "
@@ -249,7 +250,7 @@ def launch(
         if requested and tiktok_web and submit_live.get():
             submit_live.set(False)
             tiktok_sender.submit_enabled = False
-            pipeline.draft_only = True
+            pipeline.set_draft_only(True)
             send_button.configure(text="Bật/Tắt điền số (F8)")
             count_label.set(
                 f"Lượt điền: {totals['sent']} | Bỏ qua: {sum(totals['skipped'].values())}"
@@ -327,16 +328,29 @@ def launch(
     if youtube_test:
         dry_check.configure(state="disabled")
 
-    submit_mode_check = None
+    submit_mode_controls = []
     if tiktok_web:
-        submit_mode_check = ttk.Checkbutton(
-            root,
-            text="Tự gửi comment bằng Enter sau khi nhận số cuối câu",
+        mode_frame = ttk.LabelFrame(root, text="Thao tác khi nhận được số")
+        mode_frame.pack(fill="x", padx=12, pady=(2, 4))
+        fill_mode = ttk.Radiobutton(
+            mode_frame,
+            text="Chỉ điền số · thay số cũ",
             variable=submit_live,
+            value=False,
             command=lambda: set_tiktok_submit_mode(),
             state="disabled",
         )
-        submit_mode_check.pack(anchor="w", padx=18)
+        send_mode = ttk.Radiobutton(
+            mode_frame,
+            text="Gửi @+số bằng Enter",
+            variable=submit_live,
+            value=True,
+            command=lambda: set_tiktok_submit_mode(),
+            state="disabled",
+        )
+        fill_mode.pack(side="left", padx=(8, 18), pady=3)
+        send_mode.pack(side="left", padx=8, pady=3)
+        submit_mode_controls.extend((fill_mode, send_mode))
 
     vars_by_key = {}
     if youtube_test:
@@ -486,7 +500,7 @@ def launch(
             return
         requested = submit_live.get()
         if controller.armed.is_set():
-            submit_live.set(not requested)
+            submit_live.set(tiktok_sender.submit_enabled)
             messagebox.showinfo(
                 "Hãy tắt trước",
                 "Chỉ đổi chế độ gửi khi app đang disarmed. Nhấn F8 để tắt rồi thử lại.",
@@ -494,7 +508,7 @@ def launch(
             )
             return
         if requested and (not sender_ready.is_set() or config.run.dry_run):
-            submit_live.set(False)
+            submit_live.set(tiktok_sender.submit_enabled)
             messagebox.showinfo(
                 "Tab chưa sẵn sàng",
                 "Hãy kết nối và kiểm tra ô nhập TikTok trước khi bật gửi comment.",
@@ -502,7 +516,7 @@ def launch(
             )
             return
         tiktok_sender.submit_enabled = requested
-        pipeline.draft_only = not requested
+        pipeline.set_draft_only(not requested)
         send_button.configure(
             text=(
                 "Bật/Tắt gửi comment bằng Enter (F8)"
@@ -611,9 +625,9 @@ def launch(
         submit_live.set(False)
         if tiktok_sender is not None:
             tiktok_sender.submit_enabled = False
-        pipeline.draft_only = True
-        if submit_mode_check is not None:
-            submit_mode_check.configure(state="disabled")
+        pipeline.set_draft_only(True)
+        for control in submit_mode_controls:
+            control.configure(state="disabled")
         send_button.configure(text="Bật/Tắt điền số (F8)")
         replacement = NullSender()
         pipeline.sender = replacement
@@ -639,8 +653,9 @@ def launch(
         prepare_button.configure(
             state="disabled", text="Tab đã kết nối · thao tác vẫn tắt"
         )
-        if submit_mode_check is not None:
-            submit_mode_check.configure(state="normal")
+        if submit_mode_controls:
+            for control in submit_mode_controls:
+                control.configure(state="normal")
             set_tiktok_submit_mode()
         else:
             state.set("TAB SẴN SÀNG — NHẤN F8 ĐỂ ĐIỀN SỐ")
@@ -723,9 +738,9 @@ def launch(
                 )
                 submit_live.set(False)
                 tiktok_sender.submit_enabled = False
-                pipeline.draft_only = True
-                if submit_mode_check is not None:
-                    submit_mode_check.configure(state="disabled")
+                pipeline.set_draft_only(True)
+                for control in submit_mode_controls:
+                    control.configure(state="disabled")
                 send_button.configure(text="Bật/Tắt điền số (F8)")
                 state.set("NUMBERTYPER — TAB NGẮT · GỬI ĐÃ KHÓA")
                 add_log(

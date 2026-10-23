@@ -48,9 +48,19 @@ async function performTabAction(action) {
   }
   if (
     ['draft', 'submit'].includes(action.action) &&
-    (typeof action.text !== 'string' || !/^@[0-9]+$/.test(action.text))
+    (
+      typeof action.text !== 'string' ||
+      (action.action === 'submit'
+        ? !/^@[0-9]+$/.test(action.text)
+        : !/^[0-9]+$/.test(action.text))
+    )
   ) {
-    return {ok: false, error: 'The chat comment must be an @-prefixed ASCII number.'};
+    return {
+      ok: false,
+      error: action.action === 'submit'
+        ? 'A submitted comment must be @ followed by an ASCII number.'
+        : 'A draft must contain an ASCII number.'
+    };
   }
   const selectors = Array.isArray(action.selectors) ? action.selectors : [];
   const [execution] = await chrome.scripting.executeScript({
@@ -132,16 +142,29 @@ async function performTabAction(action) {
       const existing = input.isContentEditable
         ? input.textContent
         : ('value' in input ? input.value : input.textContent);
-      if (String(existing || '').trim()) {
-        return {ok: false, error: 'The chat input is not empty; clear it before filling a number.'};
+      const currentText = String(existing || '').trim();
+      if (payload.action === 'submit' && currentText) {
+        return {ok: false, error: 'The chat input is not empty; clear it before sending a number.'};
+      }
+      if (payload.action === 'draft' && currentText && !/^@?[0-9]+$/.test(currentText)) {
+        return {ok: false, error: 'The chat input contains text other than a numeric draft; it was left unchanged.'};
       }
       input.focus();
       if (input.isContentEditable) {
+        if (currentText) {
+          const selection = window.getSelection();
+          const range = document.createRange();
+          range.selectNodeContents(input);
+          selection.removeAllRanges();
+          selection.addRange(range);
+        }
         const inserted = document.execCommand('insertText', false, payload.text);
         if (!inserted) {
           input.textContent = payload.text;
           input.dispatchEvent(new InputEvent('input', {
-            bubbles: true, inputType: 'insertText', data: payload.text
+            bubbles: true,
+            inputType: currentText ? 'insertReplacementText' : 'insertText',
+            data: payload.text
           }));
         }
       } else {
@@ -151,7 +174,9 @@ async function performTabAction(action) {
         if (!setter) return {ok: false, error: 'The visible chat input cannot accept text.'};
         setter.call(input, payload.text);
         input.dispatchEvent(new InputEvent('input', {
-          bubbles: true, inputType: 'insertText', data: payload.text
+          bubbles: true,
+          inputType: currentText ? 'insertReplacementText' : 'insertText',
+          data: payload.text
         }));
         input.dispatchEvent(new Event('change', {bubbles: true}));
       }

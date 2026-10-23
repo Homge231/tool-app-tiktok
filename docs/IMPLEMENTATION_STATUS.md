@@ -1,6 +1,24 @@
 # PriceTyper implementation status
 
-Updated: 2026-10-22
+Updated: 2026-10-23
+
+## Session update — 2026-10-23
+
+The current TikTok GUI preselects auto-submit of `@<number>` after a successful tab probe. Dry-run remains enabled and the action remains disarmed until the user disables dry-run and presses F8; fill-only remains available. The Windows preview installer and model smoke check were recorded in the preceding session; artifact and hash are in `second-brain/Current-State.md`. No new build, browser run, live TikTok action, or latency/accuracy measurement was performed in this documentation update. Actual comment appearance, current browser compatibility, exact-number accuracy, sub-1-second end-to-end latency, and four-hour stability remain unaccepted.
+
+## User-reported TikTok check — 2026-10-23
+
+The user reports that a TikTok comment appeared with the recognized number. The input showed `@123` before submission, but the displayed comment omitted `@`. The user then provided a screenshot showing a separate manually entered `@1` comment displayed in the same TikTok Live chat. This proves `@1` can appear in that session and rules out a blanket claim that TikTok always strips `@`; it does not show whether NumberTyper's inserted value was preserved by the page's input state. Browser, app, and extension versions were not provided, so this remains partial user-reported evidence and does not establish browser compatibility or repeatable formatting behavior. The current source prefixes numeric sender text with `@`; the extension validates the `@`-prefixed payload and confirms the same text in the input before dispatching Enter. No new live action, build, or automated check was run in this follow-up.
+
+Follow-up code change: the extension now yields one JavaScript microtask after inserting text, then checks the exact input text before any Enter dispatch. This is intended to let page input handlers update before submission; it has not been tested against TikTok or a packaged build. The comment-rendering issue remains unresolved until a new manual check.
+
+## M8 continuous fill-only replacement — 2026-10-23
+
+Fill-only decisions no longer use same-number cooldown, any-number cooldown, or the per-minute send cap. The ASR/parser always keeps the recognized number as a raw numeric value, such as `12`. Fill-only writes that plain number and replaces an existing numeric draft; submit mode formats it as `@12`, requires an empty field, and retains cooldowns and the per-minute cap. The GUI replaces the send checkbox with mutually exclusive “Chỉ điền số · thay số cũ” and “Gửi @+số bằng Enter” radio options; dry-run remains a separate safety control, and F8/F10 behavior is unchanged. Updated project docs to match this distinction.
+
+Checks run: `node --check browser_extension/service-worker.js`, Python `py_compile` for `decider.py`, `pipeline.py`, and `gui.py`, and `git diff --check` all passed. Automated tests were not run. No app GUI launch, browser extension reload, TikTok interaction, or packaged build was performed, so field replacement and the updated controls still need a manual check in the user's browser.
+
+For cross-session project memory, open `second-brain/` as an Obsidian vault and follow `second-brain/00-Start-Here.md`. This vault summarizes context; the technical docs remain the detailed source of truth.
 
 This file tracks code present in the workspace separately from acceptance evidence. “Implemented” does not mean verified on a live browser, audio device, or phone.
 

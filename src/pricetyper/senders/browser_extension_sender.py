@@ -60,7 +60,8 @@ class BrowserExtensionSender:
             raise ValueError(
                 "browser extension sender accepts an optional @ followed by ASCII digits"
             )
-        comment_text = text if text.startswith("@") else f"@{text}"
+        number_text = text[1:] if text.startswith("@") else text
+        comment_text = f"@{number_text}" if self.submit_enabled else number_text
         session = self.source.session
         current_session = (
             (session["tab_id"], session["host"], session["path"])

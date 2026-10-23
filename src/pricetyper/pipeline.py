@@ -71,6 +71,7 @@ class Pipeline:
             decider_cfg,
             armed=controller.armed.is_set(),
             candidate_scope=candidate_scope,
+            draft_only=draft_only,
         )
         self._threads = []
         self._audio_origin = None
@@ -81,6 +82,10 @@ class Pipeline:
         self._audio_generation = 0
         self._audio_generation_lock = threading.Lock()
         self._last_gap_warning_ns: dict[str, int] = {}
+
+    def set_draft_only(self, draft_only: bool) -> None:
+        self.draft_only = draft_only
+        self.decider.draft_only = draft_only
 
     def _enqueue_audio(self, item):
         with self._audio_generation_lock:
