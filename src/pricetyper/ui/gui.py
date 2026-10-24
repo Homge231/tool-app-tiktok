@@ -725,7 +725,8 @@ def launch(
                 pipeline.report_audio_gap(
                     reason="browser_bridge_audio_stalled",
                     message=(
-                        "Bridge còn kết nối nhưng không có chunk audio tab trong 2 giây. "
+                        "Bridge còn kết nối nhưng audio tab "
+                        "không có chunk trong 2 giây. "
                         "App đã reset nhận dạng và tắt thao tác; "
                         "hãy dừng rồi bắt lại tab từ extension."
                     ),
