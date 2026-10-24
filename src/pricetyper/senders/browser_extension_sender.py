@@ -98,7 +98,7 @@ class BrowserExtensionSender:
                 result.get("error") or "The browser rejected the tab action",
             )
         expected_delivery = (
-            "enter_dispatched_unverified"
+            "send_button_clicked_unverified"
             if self.submit_enabled
             else "draft_filled_unsubmitted"
         )
@@ -114,7 +114,8 @@ class BrowserExtensionSender:
                 True,
                 start,
                 time.perf_counter_ns(),
-                "send_unverified: Enter was dispatched; comment appearance is not confirmed",
+                "send_unverified: TikTok send-button click was dispatched; "
+                "comment appearance is not confirmed",
             )
         return SendResult(True, start, time.perf_counter_ns())
 

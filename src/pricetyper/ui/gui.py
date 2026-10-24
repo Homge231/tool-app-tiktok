@@ -77,7 +77,11 @@ def launch(
         else _make_sender(config)
     )
     controller = Controller(sender, logger)
-    asr = create_asr_engine(config, emit_partials=not tiktok_web)
+    asr = create_asr_engine(
+        config,
+        emit_partials=not tiktok_web,
+        vad_min_silence_duration=0.12 if tiktok_web else 0.25,
+    )
     comparison_session = None
     if asr_compare:
         from pricetyper.asr.comparison import ASRComparisonSession
@@ -228,9 +232,10 @@ def launch(
             text=(
                 "Mở TikTok Live trong trình duyệt, bấm extension và bắt đầu thu tab. "
                 "App nhận dạng số cuối câu trên đúng tab đó. Sau khi kết nối, chọn "
-                "Chỉ điền số thô để thay số cũ, hoặc Gửi @+số bằng Enter. "
-                "Dòng Nghe được chỉ đổi sau khi "
-                "VAD chốt câu; bấm F8 hoặc kết nối tab không dừng nhận dạng. "
+                "Chỉ điền số thô để thay số cũ, hoặc gửi @+số bằng nút gửi TikTok. "
+                "Dòng Nghe được đổi sau khi VAD thấy im lặng khoảng 120 ms; "
+                "khoảng chờ ngắn có thể cắt giữa câu. Bấm F8 hoặc kết nối tab "
+                "không dừng nhận dạng. "
                 "Chỉ ASR final mới được xử lý. "
                 "TikTok tắt giải mã partial lặp lại để giảm nghẽn audio; "
                 "đoạn nói liên tục quá 12 giây chỉ được xem trước, không gửi. "
@@ -342,7 +347,7 @@ def launch(
         )
         send_mode = ttk.Radiobutton(
             mode_frame,
-            text="Gửi @+số bằng Enter",
+            text="Gửi @+số bằng nút gửi TikTok",
             variable=submit_live,
             value=True,
             command=lambda: set_tiktok_submit_mode(),
@@ -519,13 +524,13 @@ def launch(
         pipeline.set_draft_only(not requested)
         send_button.configure(
             text=(
-                "Bật/Tắt gửi comment bằng Enter (F8)"
+                "Bật/Tắt gửi comment tự động (F8)"
                 if requested
                 else "Bật/Tắt điền số (F8)"
             )
         )
         count_label.set(
-            f"{'Lệnh gửi Enter' if requested else 'Lượt điền'}: {totals['sent']} | "
+            f"{'Lệnh gửi' if requested else 'Lượt điền'}: {totals['sent']} | "
             f"Bỏ qua: {sum(totals['skipped'].values())}"
         )
         if sender_ready.is_set() and not config.run.dry_run:
@@ -535,7 +540,7 @@ def launch(
                 else "TAB SẴN SÀNG — NHẤN F8 ĐỂ ĐIỀN SỐ"
             )
         add_log(
-            "Đã bật gửi comment bằng Enter; việc comment xuất hiện chưa được xác nhận."
+            "Đã bật gửi qua nút TikTok; app không xác minh comment xuất hiện."
             if requested
             else "Đã chọn chế độ chỉ điền số, không gửi comment."
         )
@@ -677,9 +682,11 @@ def launch(
     last_overflow_count = 0
     had_bridge_connection = False
     was_bridge_connected = False
+    audio_stall_reported = False
 
     def poll():
         nonlocal last_overflow_count, had_bridge_connection, was_bridge_connected
+        nonlocal audio_stall_reported
         if tab_capture_mode:
             session = source.session
             bridge_connected = source.connected and session is not None
@@ -693,6 +700,8 @@ def launch(
                 else "Đang chờ extension kết nối…"
             )
             if bridge_connected and had_bridge_connection and not was_bridge_connected:
+                if warning_code["value"] == "audio_gap":
+                    clear_health_warning()
                 show_health_warning(
                     "bridge_reconnected",
                     "Audio tab đã kết nối lại. App vẫn disarm; hãy kiểm tra số nhận dạng trước khi bật lại.",
@@ -710,6 +719,31 @@ def launch(
             if bridge_connected:
                 had_bridge_connection = True
             was_bridge_connected = bridge_connected
+            audio_stalled = bridge_connected and source.audio_stalled
+            if audio_stalled and not audio_stall_reported:
+                audio_status.set("Bridge kết nối nhưng audio tab đã ngừng gửi dữ liệu")
+                pipeline.report_audio_gap(
+                    reason="browser_bridge_audio_stalled",
+                    message=(
+                        "Bridge còn kết nối nhưng không có chunk audio tab trong 2 giây. "
+                        "App đã reset nhận dạng và tắt thao tác; "
+                        "hãy dừng rồi bắt lại tab từ extension."
+                    ),
+                )
+                audio_stall_reported = True
+            elif audio_stall_reported and not audio_stalled:
+                if bridge_connected:
+                    pipeline.ui_q.put(
+                        {
+                            "kind": "health_recovered",
+                            "code": "audio_gap",
+                            "message": (
+                                "Audio tab đã gửi dữ liệu trở lại; thao tác vẫn tắt, "
+                                "hãy kiểm tra rồi bật F8 thủ công."
+                            ),
+                        }
+                    )
+                audio_stall_reported = False
             if source.overflow_count > last_overflow_count:
                 dropped = source.overflow_count - last_overflow_count
                 pipeline.report_audio_gap(
@@ -877,7 +911,7 @@ def launch(
                             if kind == "draft"
                             else "xem trước"
                             if kind == "preview"
-                            else "Enter đã phát; chưa xác minh comment"
+                            else "Nút gửi đã nhấn; chưa xác minh comment"
                             if unverified
                             else "gửi"
                         )
@@ -895,7 +929,7 @@ def launch(
                         )
                         if unverified:
                             add_log(
-                                f"Đã phát Enter cho số {item['value']}; "
+                                f"Đã nhấn nút gửi cho số {item['value']}; "
                                 "chưa xác minh comment xuất hiện."
                             )
                     else:
@@ -926,7 +960,7 @@ def launch(
                         for reason, count in totals["skipped"].items()
                     )
                     count_label.set(
-                        f"{('Lệnh gửi Enter' if submit_live.get() else 'Lượt điền') if tiktok_web else 'Đã gửi'}: {totals['sent']} | Bỏ qua: {skipped_total}"
+                        f"{('Lệnh gửi' if submit_live.get() else 'Lượt điền') if tiktok_web else 'Đã gửi'}: {totals['sent']} | Bỏ qua: {skipped_total}"
                         + (f" ({details})" if details else "")
                     )
         except queue.Empty:

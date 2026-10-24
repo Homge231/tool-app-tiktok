@@ -93,6 +93,17 @@ async function performTabAction(action) {
           .map(([name, value]) => `${name}=${JSON.stringify(value.slice(0, 80))}`);
         return `<${element.tagName.toLowerCase()}>${details.length ? ` ${details.join(' ')}` : ''}`;
       };
+      const findSubmitButton = (editable) => {
+        let scope = editable.parentElement;
+        for (let depth = 0; scope && depth < 6; depth += 1, scope = scope.parentElement) {
+          const buttons = [...scope.querySelectorAll(
+            '[data-e2e="room-chat-send-btn"]'
+          )].filter((button) => visible(button) && button.isConnected &&
+            !button.disabled && button.getAttribute('aria-disabled') !== 'true');
+          if (buttons.length) return buttons.length === 1 ? buttons[0] : null;
+        }
+        return null;
+      };
       let input = null;
       let matchedSelector = false;
       for (const selector of payload.selectors) {
@@ -138,6 +149,12 @@ async function performTabAction(action) {
         };
       }
       if (payload.action === 'probe') return {ok: true};
+      if (payload.action === 'submit' && !findSubmitButton(input)) {
+        return {
+          ok: false,
+          error: 'No unique visible send button was found beside the chat input; nothing was changed.'
+        };
+      }
 
       const existing = input.isContentEditable
         ? input.textContent
@@ -191,11 +208,15 @@ async function performTabAction(action) {
       }
 
       if (payload.action === 'submit') {
-        input.dispatchEvent(new KeyboardEvent('keydown', {
-          key: 'Enter', code: 'Enter', keyCode: 13, which: 13,
-          bubbles: true, cancelable: true
-        }));
-        return {ok: true, delivery: 'enter_dispatched_unverified'};
+        const button = findSubmitButton(input);
+        if (!button || button.disabled || !button.isConnected) {
+          return {
+            ok: false,
+            error: 'The @-number is in the input, but the TikTok send button is unavailable; nothing was submitted.'
+          };
+        }
+        button.click();
+        return {ok: true, delivery: 'send_button_clicked_unverified'};
       }
 
       return {ok: true, delivery: 'draft_filled_unsubmitted'};

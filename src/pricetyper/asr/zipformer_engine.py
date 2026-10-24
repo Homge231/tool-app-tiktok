@@ -13,6 +13,7 @@ MODEL_NAME = "sherpa-onnx-zipformer-vi-30M-int8-2026-02-09"
 DEFAULT_MODEL_DIR = Path(__file__).resolve().parents[3] / "models" / MODEL_NAME
 DEFAULT_VAD_MODEL = Path(__file__).resolve().parents[3] / "models" / "silero_vad.onnx"
 VAD_WINDOW_SIZE = 512
+DEFAULT_MIN_SILENCE_DURATION = 0.25
 PARTIAL_INTERVAL_NS = 400_000_000
 PARTIAL_MIN_SAMPLES = int(SAMPLE_RATE * 0.45)
 MAX_ACTIVE_SPEECH_SECONDS = 12.0
@@ -63,7 +64,11 @@ def load_zipformer(model_dir: Path = DEFAULT_MODEL_DIR):
         raise ModelError(f"Không thể khởi tạo Zipformer-VI: {exc}") from exc
 
 
-def load_silero_vad(model_path: Path = DEFAULT_VAD_MODEL):
+def load_silero_vad(
+    model_path: Path = DEFAULT_VAD_MODEL,
+    *,
+    min_silence_duration: float = DEFAULT_MIN_SILENCE_DURATION,
+):
     sherpa_onnx = _load_sherpa_onnx()
     if not model_path.is_file():
         raise ModelError(
@@ -71,10 +76,13 @@ def load_silero_vad(model_path: Path = DEFAULT_VAD_MODEL):
             ".\\.venv\\Scripts\\python.exe scripts\\download_robust_asr_models.py"
         )
 
+    if min_silence_duration <= 0:
+        raise ValueError("min_silence_duration must be positive")
+
     silero = sherpa_onnx.SileroVadModelConfig(
         model=str(model_path),
         threshold=0.5,
-        min_silence_duration=0.25,
+        min_silence_duration=min_silence_duration,
         min_speech_duration=0.12,
         window_size=VAD_WINDOW_SIZE,
         max_speech_duration=MAX_ACTIVE_SPEECH_SECONDS,
@@ -120,13 +128,21 @@ class ZipformerEngine:
         vad=None,
         emit_partials: bool = True,
         max_active_speech_seconds: float = MAX_ACTIVE_SPEECH_SECONDS,
+        vad_min_silence_duration: float = DEFAULT_MIN_SILENCE_DURATION,
     ):
         if max_active_speech_seconds <= 0:
             raise ValueError("max_active_speech_seconds must be positive")
         self._recognizer = (
             load_zipformer(model_dir) if recognizer is None else recognizer
         )
-        self._vad = load_silero_vad(vad_model_path) if vad is None else vad
+        self._vad = (
+            load_silero_vad(
+                vad_model_path,
+                min_silence_duration=vad_min_silence_duration,
+            )
+            if vad is None
+            else vad
+        )
         self.emit_partials = emit_partials
         self._max_active_speech_samples = int(SAMPLE_RATE * max_active_speech_seconds)
         self._pending = np.empty(0, dtype=np.float32)

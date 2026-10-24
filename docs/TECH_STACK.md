@@ -20,14 +20,14 @@ TikTok final candidate
   → cùng WebSocket extension bridge → kiểm tra tab ID/host/path/input → dispatch action trong tab đã capture
 ```
 
-Extension chỉ capture tab người dùng chọn và không đọc lịch sử chat/bình luận. Sau khi kiểm tra tab, TikTok có hai chế độ: chỉ điền số thô để thay bản nháp số cũ, hoặc gửi số final theo dạng `@<số>` bằng Enter; ví dụ nhận `12` thì sender gửi `@12`. Thao tác cần F8. Acknowledgement Enter chỉ xác nhận event được dispatch, chưa chứng minh comment đã xuất hiện. Chế độ so sánh giữ tối đa 20 giây audio của một đoạn trong RAM rồi xóa; audio không gửi cloud hoặc ghi file.
+Extension chỉ capture tab người dùng chọn và không đọc lịch sử chat/bình luận. Sau khi kiểm tra tab, TikTok có hai chế độ: chỉ điền số thô để thay bản nháp số cũ, hoặc tự gửi số final theo dạng `@<số>` bằng cách click nút `[data-e2e="room-chat-send-btn"]`; ví dụ nhận `12` thì sender gửi `@12`. Thao tác cần F8. Acknowledgement chỉ xác nhận click được dispatch, chưa chứng minh comment đã xuất hiện. Chế độ so sánh giữ tối đa 20 giây audio của một đoạn trong RAM rồi xóa; audio không gửi cloud hoặc ghi file.
 
 ## Công nghệ
 
 | Phần | Công nghệ đang dùng | Vai trò / giới hạn hiện tại |
 |---|---|---|
 | Ứng dụng | Python 3.12 trở lên; `tkinter`/`ttk`; PyInstaller | GUI desktop Windows có bản dựng one-directory và bộ cài NSIS per-user; chưa phát hành công khai. |
-| Capture và action trình duyệt | Chromium Extension Manifest V3, `chrome.tabCapture`, `chrome.scripting`, offscreen document, AudioWorklet | Capture âm thanh và dispatch fill/optional Enter trong tab người dùng chọn. Chrome/Edge/Cốc Cốc chưa được nghiệm thu lại với build này. Firefox, Safari và mobile chưa hỗ trợ. |
+| Capture và action trình duyệt | Chromium Extension Manifest V3, `chrome.tabCapture`, `chrome.scripting`, offscreen document, AudioWorklet | Capture âm thanh và dispatch fill/optional send-button click trong tab người dùng chọn. Chrome/Edge/Cốc Cốc chưa được nghiệm thu lại với build này. Firefox, Safari và mobile chưa hỗ trợ. |
 | Audio/action bridge | WebSocket `websockets`, loopback `127.0.0.1:8765`, NumPy | Chuyển PCM mono 16 kHz, signed PCM16 từng khung 40 ms; TikTok action acknowledgement quay lại cùng kết nối. |
 | ASR chính | `sherpa-onnx==1.13.8`, Zipformer-VI 30M INT8 + Silero VAD | Chạy local. Model ASR là offline; VAD chốt câu khi có khoảng nghỉ, partial phải giải mã lại đoạn đang nói. Độ chính xác trên livestream chưa được chấp nhận. |
 | ASR baseline | Vosk `0.3.45` và model tiếng Việt `vosk-model-small-vn-0.4` | Chỉ dùng làm đối chứng trong benchmark hoặc khi chọn `asr.engine: vosk`; không còn là mặc định. |

@@ -252,6 +252,8 @@ def _configure_tiktok_web(config):
     config.audio.source = "browser_tab"
     config.run.dry_run = True
     config.run.start_armed = False
+    config.decision.cooldown_same_s = 2.0
+    config.decision.cooldown_any_s = 0.2
 
 
 def _discover(config, tiktok_web=False):

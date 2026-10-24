@@ -45,6 +45,7 @@ class BrowserTabSource:
     SAMPLE_RATE = 16_000
     CHUNK_MS = 40
     CHUNK_BYTES = SAMPLE_RATE * CHUNK_MS // 1000 * 2
+    AUDIO_STALL_NS = 2_000_000_000
 
     def __init__(
         self,
@@ -85,6 +86,7 @@ class BrowserTabSource:
         self._connected = threading.Event()
         self._overflow_count = 0
         self._overflow_lock = threading.Lock()
+        self._last_audio_ns = 0
 
     @property
     def connected(self) -> bool:
@@ -110,6 +112,13 @@ class BrowserTabSource:
     def overflow_count(self) -> int:
         with self._overflow_lock:
             return self._overflow_count
+
+    @property
+    def audio_stalled(self) -> bool:
+        return bool(
+            self._last_audio_ns
+            and time.monotonic_ns() - self._last_audio_ns >= self.AUDIO_STALL_NS
+        )
 
     def start(self) -> None:
         if self._thread and self._thread.is_alive():
@@ -190,6 +199,7 @@ class BrowserTabSource:
         with self._session_lock:
             self._session = session
         self._active_websocket = websocket
+        self._last_audio_ns = time.monotonic_ns()
         self._connected.set()
         try:
             for message in websocket:
@@ -203,6 +213,7 @@ class BrowserTabSource:
                         code=1003, reason="Expected one 40 ms mono PCM16 chunk"
                     )
                     return
+                self._last_audio_ns = time.monotonic_ns()
                 item = (message, time.perf_counter_ns())
                 try:
                     self._chunks.put_nowait(item)
@@ -219,6 +230,7 @@ class BrowserTabSource:
         finally:
             self._connected.clear()
             self._active_websocket = None
+            self._last_audio_ns = 0
             with self._session_lock:
                 self._session = None
             with self._pending_lock:
@@ -267,7 +279,9 @@ class BrowserTabSource:
                 websocket.send(json.dumps(payload, separators=(",", ":")))
             return result_queue.get(timeout=timeout)
         except queue.Empty as exc:
-            raise TimeoutError("The browser did not acknowledge the tab action") from exc
+            raise TimeoutError(
+                "The browser did not acknowledge the tab action"
+            ) from exc
         finally:
             with self._pending_lock:
                 self._pending_actions.pop(action_id, None)

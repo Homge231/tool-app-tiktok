@@ -85,6 +85,15 @@ async function startCapture(streamId, host, pathname, tabId) {
       audio: {mandatory: {chromeMediaSource: 'tab', chromeMediaSourceId: streamId}},
       video: false
     });
+    for (const track of captureStream.getAudioTracks()) {
+      track.addEventListener('ended', () => {
+        if (stopping || !captureStream || captureStream.getAudioTracks().some((item) => item.readyState === 'live')) return;
+        stopCapture(false).then(() => publishState({
+          active: false, host, pathname, tabId,
+          error: 'The selected tab audio stream ended. Start capture again.'
+        }));
+      }, {once: true});
+    }
     playbackContext = new AudioContext();
     captureContext = new AudioContext({sampleRate: 16000});
     await captureContext.audioWorklet.addModule(chrome.runtime.getURL('pcm-worklet.js'));
