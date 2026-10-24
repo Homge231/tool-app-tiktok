@@ -30,6 +30,7 @@ class Pipeline:
         candidate_scope="price",
         send_final_only=False,
         draft_only=False,
+        candidate_range=None,
     ):
         if candidate_scope not in {"number", "price"}:
             raise ValueError("candidate_scope must be 'number' or 'price'")
@@ -38,6 +39,7 @@ class Pipeline:
         self.audio_observer = audio_observer
         self.log_transcript_text = log_transcript_text
         self.candidate_scope = candidate_scope
+        self.candidate_range = candidate_range
         self.send_final_only = send_final_only
         self.draft_only = draft_only
         self.audio_q = queue.Queue(maxsize=config.audio.queue_max_chunks)
@@ -72,6 +74,7 @@ class Pipeline:
             armed=controller.armed.is_set(),
             candidate_scope=candidate_scope,
             draft_only=draft_only,
+            candidate_range=candidate_range,
         )
         self._threads = []
         self._audio_origin = None
@@ -331,6 +334,11 @@ class Pipeline:
                     if self.candidate_scope == "number"
                     else passed
                 )
+                candidate_span = displayed[-1] if displayed else None
+                if candidate_span and self.candidate_range is not None:
+                    minimum, maximum = self.candidate_range
+                    if not minimum <= candidate_span.value <= maximum:
+                        candidate_span = None
                 parse_fields = {
                     "spans": [
                         {
@@ -353,7 +361,7 @@ class Pipeline:
                     {
                         "kind": "parse",
                         "event_kind": event.kind,
-                        "candidate": displayed[-1].value if displayed else None,
+                        "candidate": candidate_span.value if candidate_span else None,
                         "asr_chunk_delay_ms": max(
                             0.0, (event.t_ns - event.t_audio_ns) / 1e6
                         ),

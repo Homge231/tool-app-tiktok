@@ -14,13 +14,13 @@ Tab YouTube hoặc TikTok Live do người dùng chọn
   → Python: nhận audio trong bộ nhớ
   → nhánh audio gốc và nhánh thử khử nhiễu DPDFNet
   → Silero VAD → Zipformer-VI (primary) / Vosk / faster-whisper (benchmarks)
-  → TikTok number scope: phân tích số tiếng Việt, bỏ qua ngưỡng lọc giá
+  → TikTok number scope: bỏ qua gate giá, chỉ nhận số cuối 100–999
   → giao diện Tkinter tách candidate tạm từ partial khỏi final
 TikTok final candidate
   → cùng WebSocket extension bridge → kiểm tra tab ID/host/path/input → dispatch action trong tab đã capture
 ```
 
-Extension chỉ capture tab người dùng chọn và không đọc lịch sử chat/bình luận. Sau khi kiểm tra tab, TikTok có hai chế độ: chỉ điền số thô để thay bản nháp số cũ, hoặc tự gửi số final theo dạng `@<số>` bằng cách click nút `[data-e2e="room-chat-send-btn"]`; ví dụ nhận `12` thì sender gửi `@12`. Thao tác cần F8. Acknowledgement chỉ xác nhận click được dispatch, chưa chứng minh comment đã xuất hiện. Chế độ so sánh giữ tối đa 20 giây audio của một đoạn trong RAM rồi xóa; audio không gửi cloud hoặc ghi file.
+Extension chỉ capture tab người dùng chọn và không đọc lịch sử chat/bình luận. Sau khi kiểm tra tab, TikTok có checkbox tự gửi: bật để gửi số final theo dạng `@<số>` bằng cách click nút `[data-e2e="room-chat-send-btn"]`, tắt để chỉ điền số thô thay bản nháp cũ. Chỉ số cuối câu từ 100 đến 999 được xử lý; ví dụ nhận `123` thì sender gửi `@123`. Thao tác thật cần tắt dry-run và nhấn F8. Acknowledgement chỉ xác nhận click được dispatch, chưa chứng minh comment đã xuất hiện. Chế độ so sánh giữ tối đa 20 giây audio của một đoạn trong RAM rồi xóa; audio không gửi cloud hoặc ghi file.
 
 ## Công nghệ
 

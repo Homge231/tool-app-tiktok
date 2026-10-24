@@ -43,12 +43,14 @@ class Decider:
         armed: bool = False,
         candidate_scope: str = "price",
         draft_only: bool = False,
+        candidate_range: tuple[int, int] | None = None,
     ):
         if candidate_scope not in {"number", "price"}:
             raise ValueError("candidate_scope must be 'number' or 'price'")
         self.gate_cfg, self.cfg, self.armed = gate_cfg or GateCfg(), cfg or DeciderCfg(), armed
         self.candidate_scope = candidate_scope
         self.draft_only = draft_only
+        self.candidate_range = candidate_range
         self.pending: Pending | None = None
         self.handled: set[int] = set()
         self.sent: list[tuple[int, int]] = []
@@ -95,6 +97,10 @@ class Decider:
             else gate(text, parsed, self.gate_cfg)
         )
         candidate = spans[-1] if spans else None
+        if candidate and self.candidate_range is not None:
+            minimum, maximum = self.candidate_range
+            if not minimum <= candidate.value <= maximum:
+                candidate = None
         final = kind == 'final'
         if candidate is None or candidate.value in self.handled:
             self.pending = None

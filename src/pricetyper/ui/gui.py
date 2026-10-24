@@ -101,6 +101,7 @@ def launch(
         candidate_scope="number" if youtube_test or tiktok_web else "price",
         send_final_only=tiktok_web,
         draft_only=tiktok_web,
+        candidate_range=(100, 999) if tiktok_web else None,
     )
 
     state = tk.StringVar(
@@ -231,8 +232,8 @@ def launch(
             root,
             text=(
                 "Mở TikTok Live trong trình duyệt, bấm extension và bắt đầu thu tab. "
-                "App nhận dạng số cuối câu trên đúng tab đó. Sau khi kết nối, chọn "
-                "Chỉ điền số thô để thay số cũ, hoặc gửi @+số bằng nút gửi TikTok. "
+                "App chỉ xử lý số cuối câu từ 100 đến 999 trên đúng tab đó. Sau khi kết nối, "
+                "bật hoặc tắt tự động gửi @+số; khi tắt app chỉ điền số thô và thay số cũ. "
                 "Dòng Nghe được đổi sau khi VAD thấy im lặng khoảng 120 ms; "
                 "khoảng chờ ngắn có thể cắt giữa câu. Bấm F8 hoặc kết nối tab "
                 "không dừng nhận dạng. "
@@ -337,25 +338,15 @@ def launch(
     if tiktok_web:
         mode_frame = ttk.LabelFrame(root, text="Thao tác khi nhận được số")
         mode_frame.pack(fill="x", padx=12, pady=(2, 4))
-        fill_mode = ttk.Radiobutton(
+        fill_mode = ttk.Checkbutton(
             mode_frame,
-            text="Chỉ điền số · thay số cũ",
+            text="Tự động gửi @+số bằng nút TikTok (bỏ chọn = chỉ điền số)",
             variable=submit_live,
-            value=False,
             command=lambda: set_tiktok_submit_mode(),
             state="disabled",
         )
-        send_mode = ttk.Radiobutton(
-            mode_frame,
-            text="Gửi @+số bằng nút gửi TikTok",
-            variable=submit_live,
-            value=True,
-            command=lambda: set_tiktok_submit_mode(),
-            state="disabled",
-        )
-        fill_mode.pack(side="left", padx=(8, 18), pady=3)
-        send_mode.pack(side="left", padx=8, pady=3)
-        submit_mode_controls.extend((fill_mode, send_mode))
+        fill_mode.pack(anchor="w", padx=8, pady=3)
+        submit_mode_controls.append(fill_mode)
 
     vars_by_key = {}
     if youtube_test:
@@ -383,7 +374,7 @@ def launch(
             ttk.Label(
                 settings,
                 text=(
-                    "Xử lý số cuối câu, kể cả số nhỏ như 9; không gắn đơn vị tiền. "
+                    "Chỉ xử lý số cuối câu từ 100 đến 999; không gắn đơn vị tiền. "
                     "Cooldown và giới hạn lượt vẫn áp dụng."
                 ),
                 wraplength=600,
@@ -512,7 +503,7 @@ def launch(
                 parent=root,
             )
             return
-        if requested and (not sender_ready.is_set() or config.run.dry_run):
+        if requested and not sender_ready.is_set():
             submit_live.set(tiktok_sender.submit_enabled)
             messagebox.showinfo(
                 "Tab chưa sẵn sàng",
